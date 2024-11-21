@@ -1,5 +1,5 @@
 <?php
-include '../config/database.php';
+include '../../config/database.php';
 
 $table_number = $_POST['table_number'];
 $location = $_POST['location'];
