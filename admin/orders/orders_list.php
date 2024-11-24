@@ -1,5 +1,6 @@
 <?php
-include '../../config/database.php';
+include $_SERVER['DOCUMENT_ROOT'] . '/Project-I-BCA/config/database.php';
+
 
 // Fetch all orders
 $sql = "SELECT orders.id, users.name AS user_name, tables.table_number, orders.total_price, orders.status 

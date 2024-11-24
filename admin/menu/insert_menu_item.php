@@ -1,6 +1,7 @@
 <?php
 // Include database connection
-include '../../config/database.php';
+include $_SERVER['DOCUMENT_ROOT'] . '/Project-I-BCA/config/database.php';
+
 
 // Check if the form has been submitted
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -30,8 +31,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title>Insert Menu Item</title>
 </head>
 <body>
-    <h1>Insert Menu Item</h1>
+    <nav>
+        <ul>
+            <li><a href="/Project-I-BCA/admin/admindashboard.php">Dashboard</a></li>
+            <li><a href="/Project-I-BCA/admin/menu/menu_list.php">Menu</a></li>
+        </ul>
+    </nav>
 
+    
+    <h1>Insert Menu Item</h1>
     <?php if (isset($message)) : ?>
         <p><?php echo $message; ?></p>
     <?php endif; ?>

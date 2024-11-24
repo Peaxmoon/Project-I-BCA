@@ -25,18 +25,6 @@
 
 
 
-<!-- insert_table.php -->
-    <h2>Add Table</h2>
-    <form action="./public/insert_table.php" method="POST">
-        <label>Table Number:</label><br>
-        <input type="number" name="table_number" required><br><br>
-        
-        <label>Location:</label><br>
-        <input type="text" name="location"><br><br>
-        
-        <button type="submit">Add Table</button>
-    </form>
-
 
 <!-- insert_menu_item.php -->
     <h2>Add Menu Item</h2>

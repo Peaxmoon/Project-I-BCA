@@ -1,5 +1,6 @@
 <?php
-include '../../config/database.php';
+include $_SERVER['DOCUMENT_ROOT'] . '/Project-I-BCA/config/database.php';
+
 
 // Fetch all menu items
 $sql = "SELECT * FROM menu_items";

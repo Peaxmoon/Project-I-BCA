@@ -1,5 +1,6 @@
 <?php
-include 'config.php';
+include $_SERVER['DOCUMENT_ROOT'] . '/Project-I-BCA/config/database.php';
+
 
 $order_id = $_POST['order_id'];
 $menu_item_id = $_POST['menu_item_id'];

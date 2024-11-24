@@ -1,5 +1,6 @@
 <?php
-include '../../config/database.php';
+include $_SERVER['DOCUMENT_ROOT'] . '/Project-I-BCA/config/database.php';
+
 
 // Fetch all users
 $sql = "SELECT * FROM users";
@@ -15,6 +16,7 @@ $result = $conn->query($sql);
             <th>Email</th>
         </tr>
     </thead>
+    
     <tbody>
         <?php while ($row = $result->fetch_assoc()): ?>
             <tr>
