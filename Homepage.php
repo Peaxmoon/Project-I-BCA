@@ -10,6 +10,23 @@
     <header>
         <h1>TableServe Restaurant</h1>
     </header>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
     <main>
         <section id="menu">
             <h2>Menu</h2>
