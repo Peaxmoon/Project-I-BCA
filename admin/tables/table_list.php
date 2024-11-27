@@ -1,3 +1,4 @@
+<!-- table.php -->
 <?php
 include $_SERVER['DOCUMENT_ROOT'] . '/Project-I-BCA/config/database.php';
 
@@ -7,6 +8,8 @@ $result = $conn->query($sql);
 ?>
 
 <h2>Table Management</h2>
+
+<h3><a href="/Project-I-BCA/admin/tables//insert_table.php">Add new table</a></h3>
 <table border="1">
     <thead>
         <tr>

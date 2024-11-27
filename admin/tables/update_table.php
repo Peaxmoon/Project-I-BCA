@@ -1,3 +1,4 @@
+<!-- update_table.php -->
 <?php
 include $_SERVER['DOCUMENT_ROOT'] . '/Project-I-BCA/config/database.php';
 
