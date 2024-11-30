@@ -1,8 +1,18 @@
 <?php
 // Include database connection
 include $_SERVER['DOCUMENT_ROOT'] . '/Project-I-BCA/config/database.php';
-?>
 
+session_start();  // Start the session
+
+// Check if the user is logged in by verifying if `admin_id` exists in the session
+if (!isset($_SESSION['admin_id'])) {
+    // If no `admin_id` is found in the session, redirect to the login page
+    header("Location: admin_login.php"); 
+    exit();  // Ensure no further code is executed
+}
+
+// If the user is logged in, display the dashboard content
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,54 +20,20 @@ include $_SERVER['DOCUMENT_ROOT'] . '/Project-I-BCA/config/database.php';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
     <link rel="stylesheet" href="/public/assets/style.css"> <!-- Optional CSS -->
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-        }
-
-        header {
-            background-color: #333;
-            color: #fff;
-            padding: 10px 0;
-            text-align: center;
-        }
-
-        nav ul {
-            list-style-type: none;
-            padding: 0;
-        }
-
-        nav ul li {
-            display: inline;
-            margin: 0 15px;
-        }
-
-        nav ul li a {
-            color: blue;
-            text-decoration: none;
-        }
-
-        main {
-            padding: 20px;
-        }
-
-        footer {
-            text-align: center;
-            padding: 10px 0;
-            background-color: #333;
-            color: #fff;
-            position: fixed;
-            width: 100%;
-            bottom: 0;
-        }
-    </style>
+    
 </head>
 <body>
-    <header>
-        <h1>Admin Dashboard</h1>
+<header>
+        <h1>Welcome to Your Admin Dashboard, <?= htmlspecialchars($_SESSION['admin_name']); ?>!</h1> <!-- Safely output user data -->
+        <nav>
+            <ul>
+                <li><a href="admindashboard.php">Dashboard</a></li>
+                <li><a href="adminprofile.php">Profile</a></li>
+                <li><a href="admin_logout.php">Logout</a></li> <!-- Logout link -->
+                <li><a href="admin_login.php">Logout</a></li> <!-- Login link -->
+                <!-- <li><a href="insert_newadmin.php">Create admin</a></li> register link -->
+            </ul>
+        </nav>
     </header>
 
     <nav>
@@ -108,7 +84,7 @@ include $_SERVER['DOCUMENT_ROOT'] . '/Project-I-BCA/config/database.php';
     </main>
 
     <footer>
-        <p>&copy; 2024 Your Project</p>
+        <p>&copy; 2024 TableServe Resturant</p>
     </footer>
 </body>
 </html>

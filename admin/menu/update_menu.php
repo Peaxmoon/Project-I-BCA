@@ -2,6 +2,12 @@
 // Include database connection
 include $_SERVER['DOCUMENT_ROOT'] . '/Project-I-BCA/config/database.php';
 
+
+if (!isset($_SESSION['admin_id'])) {
+    // If no `admin_id` is found in the session, redirect to the login page
+    header("Location: /Project-I-BCA/admin/admin_login.php"); 
+    exit();  // Ensure no further code is executed
+}
 // Check if an `item_id` is provided
 if (isset($_GET['item_id'])) {
     $item_id = intval($_GET['item_id']); // Ensure `item_id` is an integer

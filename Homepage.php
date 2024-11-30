@@ -9,92 +9,35 @@
 <body>
     <header>
         <h1>TableServe Restaurant</h1>
+        <div class="topnav">
+
+            <a href="./public/menu/menu_items.php">Menu</a>
+            <a href="./public/orders/orders.php">Orders</a>
+            <a href="./public/dashboarduser.php">Dashboard</a>
+
+            <!-- <a href="login.php">Login</a>
+            <a href="register.php">Register</a>
+            <a href="logout.php">Logout</a> this part must be included inside dashboard.php-->
+        </div>
     </header>
 
 
+<!-- <?include '/includes/header.php'; ?> -->
 
 
 
+<h1>Here it will be menu i think</h1>
 
 
+<?php include_once './public/menu/menu_items.php'; ?>
+<br>
+<br>
+<br>
+<br>
+<br>
 
-
-
-
-
-
-
-
-
-    
-    <main>
-        <section id="menu">
-            <h2>Menu</h2>
-            <div id="menu-items"></div>
-        </section>
-        <section id="order">
-            <h2>Your Order</h2>
-            <div id="order-items"></div>
-            <button id="place-order">Place Order</button>
-        </section>
-    </main>
-
-
-
-
-
-<!-- insert_menu_item.php -->
-    <h2>Add Menu Item</h2>
-    <form action="./public/insert_menu_item.php" method="POST">
-        <label>Name:</label><br>
-        <input type="text" name="name" required><br><br>
-        
-        <label>Description:</label><br>
-        <textarea name="description"></textarea><br><br>
-        
-        <label>Price:</label><br>
-        <input type="number" step="1" name="price" required><br><br>
-        
-        <button type="submit">Add Menu Item</button>
-    </form>
-
-
-    <!-- order_form.php -->
-    <h2>Place Order</h2>
-    <form action="./public/insert_order.php" method="POST">
-        <label>User ID:</label><br>
-        <input type="number" name="user_id" required><br><br>
-        
-        <label>Table ID:</label><br>
-        <input type="number" name="table_id" required><br><br>
-        
-        <label>Total Price:</label><br>
-        <input type="number" step="0.01" name="total_price" required><br><br>
-        
-        <button type="submit">Place Order</button>
-    </form>
-
-
-
-
-<!-- insert_order_item.php -->
-    <h2>Add Order Item</h2>
-    <form action="./public/insert_order_item.php" method="POST">
-        <label>Order ID:</label><br>
-        <input type="number" name="order_id" required><br><br>
-        
-        <label>Menu Item ID:</label><br>
-        <input type="number" name="menu_item_id" required><br><br>
-        
-        <label>Quantity:</label><br>
-        <input type="number" name="quantity" required><br><br>
-        
-        <label>Price:</label><br>
-        <input type="number" step="0.01" name="price" required><br><br>
-        
-        <button type="submit">Add Order Item</button>
-    </form>
-
+    <?include './includes/footer.php'; ?>
     <script src="script.js"></script>
 </body>
 </html>
+

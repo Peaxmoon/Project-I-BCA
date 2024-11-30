@@ -2,6 +2,12 @@
 // Include database connection
 include $_SERVER['DOCUMENT_ROOT'] . '/Project-I-BCA/config/database.php';
 
+
+if (!isset($_SESSION['admin_id'])) {
+    // If no `admin_id` is found in the session, redirect to the login page
+    header("Location: /Project-I-BCA/admin/admin_login.php"); 
+    exit();  // Ensure no further code is executed
+}
 // Define upload directory
 $upload_dir = $_SERVER['DOCUMENT_ROOT'] . '/uploads/'; // Use a relative path
 
@@ -36,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 if ($conn->query($sql) === TRUE) {
                     // Redirect to admin dashboard on success
-                    header('Location: /Project-I-BCA/admin/admindashboard.php');
+                    header('Location: /Project-I-BCA/admin/admindashboard.php?page=menu');
                     exit(); // Always call exit after a header redirect
                 } else {
                     $message = "Error: " . $sql . "<br>" . $conn->error;

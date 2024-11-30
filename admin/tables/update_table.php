@@ -1,20 +1,24 @@
-<!-- update_table.php -->
 <?php
 include $_SERVER['DOCUMENT_ROOT'] . '/Project-I-BCA/config/database.php';
 
+if (!isset($_SESSION['admin_id'])) {
+    // If no `admin_id` is found in the session, redirect to the login page
+    header("Location: ../admin_login.php"); 
+    exit();  // Ensure no further code is executed
+}
 // Check if the form is submitted
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id = $_POST['id']; // Table ID to update
     $table_number = $_POST['table_number'];
     $location = $_POST['location'];
-    $status = $_POST['status'];
+    $status = $_POST['status']; // Include status
 
     // Update query
     $sql = "UPDATE tables SET table_number = $table_number, location = '$location', status = '$status' WHERE id = $id";
 
     if ($conn->query($sql) === TRUE) {
-        // Redirect to table_list.php after update
-        header("Location: /Project-I-BCA/admin/tables/table_list.php");
+        // Redirect to table list after update
+        header("Location: /Project-I-BCA/admin/admindashboard.php?page=tables");
         exit(); // Ensure no further code is executed
     } else {
         echo "Error: " . $sql . "<br>" . $conn->error;
@@ -44,7 +48,7 @@ if (isset($_GET['id'])) {
 ?>
 
 <h2>Update Table</h2>
-<form action="update_table.php" method="POST">
+<form action="admindashboard.php?page=tables&action=update&id=<?php echo $row['id']; ?>" method="POST">
     <input type="hidden" name="id" value="<?php echo $row['id']; ?>">
 
     <label>Table Number:</label><br>

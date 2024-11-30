@@ -1,6 +1,6 @@
 <?php
 session_start();
-require '../config/database.php'; // Include database connection
+include $_SERVER['DOCUMENT_ROOT'] . '/Project-I-BCA/config/database.php';
 
 // Check if the user is logged in
 if (!isset($_SESSION['user_id'])) {
@@ -54,6 +54,6 @@ mysqli_close($conn); // Close the database connection
         <p>You have no orders yet.</p>
     <?php endif; ?>
 
-    <a href="dashboarduser.php">Back to Dashboard</a>
+    <a href="../dashboarduser.php">Back to Dashboard</a>
 </body>
 </html>

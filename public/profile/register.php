@@ -1,6 +1,6 @@
 <?php
 // Include database configuration
-require '../config/database.php';
+require '../../config/database.php';
 
 // Check if the form is submitted
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -43,4 +43,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <button type="submit">Register</button>
 </form>
 
-<?php include '../src/includes/footer.php'; ?>
+<?php include '../../includes/footer.php'; ?>

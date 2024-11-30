@@ -1,7 +1,12 @@
-<!-- table.php -->
 <?php
 include $_SERVER['DOCUMENT_ROOT'] . '/Project-I-BCA/config/database.php';
 
+
+if (!isset($_SESSION['admin_id'])) {
+    // If no `admin_id` is found in the session, redirect to the login page
+    header("Location: ../admin_login.php"); 
+    exit();  // Ensure no further code is executed
+}
 // Fetch all tables
 $sql = "SELECT id, table_number, location, status FROM tables";
 $result = $conn->query($sql);
@@ -9,8 +14,10 @@ $result = $conn->query($sql);
 
 <h2>Table Management</h2>
 
-<h3><a href="/Project-I-BCA/admin/tables//insert_table.php">Add new table</a></h3>
-<table border="1">
+<!-- Add a link to insert a new table -->
+<h3><a href="admindashboard.php?page=tables&action=add">Add New Table</a></h3>
+
+<table border="1" style="width: 100%; border-collapse: collapse; text-align: left;">
     <thead>
         <tr>
             <th>Table ID</th>
@@ -28,8 +35,11 @@ $result = $conn->query($sql);
                 <td><?php echo $row['location']; ?></td>
                 <td><?php echo $row['status']; ?></td>
                 <td>
-                    <a href="update_table.php?id=<?php echo $row['id']; ?>">Edit</a>
-                    <a href="delete_table.php?id=<?php echo $row['id']; ?>" onclick="return confirm('Are you sure you want to delete this table?');">
+                    <!-- Link to update table -->
+                    <a href="admindashboard.php?page=tables&action=update&id=<?php echo $row['id']; ?>">Edit</a>
+
+                    <!-- Link to delete table -->
+                    <a href="admindashboard.php?page=tables&action=delete&id=<?php echo $row['id']; ?>" onclick="return confirm('Are you sure you want to delete this table?');">
                         Delete
                     </a>
                 </td>
@@ -37,7 +47,6 @@ $result = $conn->query($sql);
         <?php endwhile; ?>
     </tbody>
 </table>
-
 
 <?php
 // If a table is clicked, fetch and display orders for that table
@@ -54,7 +63,7 @@ if (isset($_GET['table_id'])) {
 
     echo "<h3>Orders for Table ID: $table_id</h3>";
     if ($order_result->num_rows > 0) {
-        echo "<table border='1'>
+        echo "<table border='1' style='width: 100%; border-collapse: collapse; text-align: left;'>
                 <thead>
                     <tr>
                         <th>Order ID</th>
@@ -79,3 +88,4 @@ if (isset($_GET['table_id'])) {
     $stmt->close();
 }
 ?>
+    

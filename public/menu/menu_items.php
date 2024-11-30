@@ -109,6 +109,8 @@ $result = $conn->query($sql);
 <body>
     <header>
         <h1>Our Menu</h1>
+        <br>    
+        <a href="/Project-I-BCA/homepage.php">Home Page</a>
     </header>
 
     <div class="container">
@@ -121,7 +123,7 @@ $result = $conn->query($sql);
                             <p class="menu-name"><?php echo htmlspecialchars($row['name']); ?></p>
                             <p class="menu-description"><?php echo htmlspecialchars($row['description']); ?></p>
                             <p class="menu-price">Rs. <?php echo htmlspecialchars($row['price']); ?></p>
-                            <a href="order.php?item_id=<?php echo $row['id']; ?>" class="order-button">Order Now</a>
+                            <a href="/Project-I-BCA/public/orders/insert_order.php?item_id=<?php echo $row['id']; ?>" class="order-button">Order Now</a>
                         </div>
                     </div>
                 <?php endwhile; ?>

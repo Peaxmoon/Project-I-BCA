@@ -1,6 +1,6 @@
 <?php
 session_start();
-require '../config/database.php';
+require '../../config/database.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Get the form data
@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['user_name'] = $user['name'];
 
             // Redirect to the dashboard or any other protected page
-            header("Location: dashboarduser.php");//now just added template but redirect to another page
+            header("Location: /Project-I-BCA/Homepage.php");//now just added template but redirect to another page
             exit();
         } else {
             echo "Invalid password.";
@@ -37,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 
 
-<?php include '../src/includes/header.php'; ?>
+<?php include '../../includes/header.php'; ?>
 
 <h4>
 <a href="register.php">Register</a>
@@ -61,4 +61,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <br>
 <br>
 <br>
-<?php include '../src/includes/footer.php'; ?>
+<?php include '../../includes/footer.php'; ?>
+
