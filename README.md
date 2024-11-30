@@ -24,6 +24,8 @@ Necessary Updates
 6. Make the table number cookie expire after 3 hour
 7. Make the new content be added from above in while showing the orders to admin cook or to users's order new element to top.
 8. Auto clear the content of table details of order details like food details, 
+9. to show orders new order at top.
+10. 
 6. Send a confirmation email or SMS to users after a successful table booking.
         eg. Example email content: "Your table #3 has been successfully booked. Thank you!"
 7. Add a feature to allow users to cancel or reschedule their reservations.

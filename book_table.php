@@ -1,4 +1,8 @@
 <?php
+// Table Number   might be links 
+//http://localhost/Project-I-BCA/book_table.php?table_number=11
+//Replace 5 with the actual table number for each QR code or link.
+
 // Start a session
 session_start();
 
@@ -18,3 +22,5 @@ if (isset($_GET['table_number'])) {
     exit();
 }
 ?>
+
+

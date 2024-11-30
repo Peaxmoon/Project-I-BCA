@@ -1,3 +1,4 @@
+<!-- menu_items.php -->
 <?php
 // Include database connection
 include $_SERVER['DOCUMENT_ROOT'] . '/Project-I-BCA/config/database.php';
@@ -9,6 +10,7 @@ $result = $conn->query($sql);
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -80,6 +82,37 @@ $result = $conn->query($sql);
             color: #4CAF50;
             margin: 10px 0;
         }
+        .quantity-selector {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin: 10px 0;
+}
+
+.quantity-btn {
+    padding: 5px 10px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.quantity-btn:hover {
+    background-color: #45a049;
+}
+
+.quantity-input {
+    width: 50px;
+    text-align: center;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
 
         .order-button {
             display: inline-block;
@@ -106,10 +139,11 @@ $result = $conn->query($sql);
         }
     </style>
 </head>
+
 <body>
     <header>
         <h1>Our Menu</h1>
-        <br>    
+        <br>
         <a href="/Project-I-BCA/homepage.php">Home Page</a>
     </header>
 
@@ -123,6 +157,11 @@ $result = $conn->query($sql);
                             <p class="menu-name"><?php echo htmlspecialchars($row['name']); ?></p>
                             <p class="menu-description"><?php echo htmlspecialchars($row['description']); ?></p>
                             <p class="menu-price">Rs. <?php echo htmlspecialchars($row['price']); ?></p>
+                            <div class="quantity-selector">
+                                <button class="quantity-btn" onclick="decreaseQuantity(this)">-</button>
+                                <input type="number" class="quantity-input" value="1" min="1" readonly>
+                                <button class="quantity-btn" onclick="increaseQuantity(this)">+</button>
+                            </div>
                             <a href="/Project-I-BCA/public/orders/insert_order.php?item_id=<?php echo $row['id']; ?>" class="order-button">Order Now</a>
                         </div>
                     </div>
@@ -136,5 +175,29 @@ $result = $conn->query($sql);
     <footer>
         <p>&copy; 2024 Restaurant Management</p>
     </footer>
+    <script>
+        function increaseQuantity(button) {
+    const input = button.previousElementSibling; // Select the input field
+    input.value = parseInt(input.value) + 1;
+}
+
+function decreaseQuantity(button) {
+    const input = button.nextElementSibling; // Select the input field
+    const currentValue = parseInt(input.value);
+    if (currentValue > 1) {
+        input.value = currentValue - 1;
+    }
+}
+
+function placeOrder(itemId, orderButton) {
+    const quantityInput = orderButton.previousElementSibling.querySelector('.quantity-input');
+    const quantity = quantityInput.value;
+
+    // Redirect to server with itemId and quantity (or send via AJAX)
+    window.location.href = `/Project-I-BCA/public/orders/insert_order.php?item_id=${itemId}&quantity=${quantity}`;
+}
+
+    </script>
 </body>
+
 </html>

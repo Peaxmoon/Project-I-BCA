@@ -4,7 +4,7 @@ include $_SERVER['DOCUMENT_ROOT'] . '/Project-I-BCA/config/database.php';
 
 // Check if the user is logged in
 if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
+    header("Location: ../profile/login.php");
     exit();
 }
 

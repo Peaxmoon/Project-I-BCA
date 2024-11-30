@@ -54,4 +54,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </form>
 
 <br><br><br>
-<?php include '../src/includes/footer.php'; ?>
+<?php include '../includes/footer.php'; ?>

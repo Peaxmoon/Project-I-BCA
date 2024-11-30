@@ -1,7 +1,7 @@
 <?php
+session_start();
 // Include database connection
 include $_SERVER['DOCUMENT_ROOT'] . '/Project-I-BCA/config/database.php';
-
 
 if (!isset($_SESSION['admin_id'])) {
     // If no `admin_id` is found in the session, redirect to the login page
