@@ -53,6 +53,8 @@ if (isset($_GET['order_id'])) {
 
         // Add a "Go Back" button
         echo "<a href='../menu/menu_items.php'><button>Go Back to Menu</button></a>";
+        echo "<a href='receipt.php'><button>Go to Receipt</button></a>";
+
     } else {
         echo "<h1>Error</h1>";
         echo "<p>Order not found or does not belong to you!</p>";

@@ -14,10 +14,11 @@
             <a href="./public/menu/menu_items.php">Menu</a>
             <a href="./public/orders/orders.php">Orders</a>
             <a href="./public/dashboarduser.php">Dashboard</a>
+            <a href="./public/orders/receipt.php">Receipt</a>
 
-            <!-- <a href="login.php">Login</a>
-            <a href="register.php">Register</a>
-            <a href="logout.php">Logout</a> this part must be included inside dashboard.php-->
+            <a href="./public/profile/login.php">Login</a>
+            <a href="./public/profile/register.php">Register</a>
+            <a href="./public/profile/logout.php">Logout</a>
         </div>
     </header>
 

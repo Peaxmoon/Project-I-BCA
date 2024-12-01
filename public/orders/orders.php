@@ -55,5 +55,6 @@ mysqli_close($conn); // Close the database connection
     <?php endif; ?>
 
     <a href="../dashboarduser.php">Back to Dashboard</a>
+    <a href="receipt.php">Go to receipt</a>
 </body>
 </html>

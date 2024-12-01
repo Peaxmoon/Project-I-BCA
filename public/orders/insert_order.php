@@ -1,74 +1,53 @@
 <?php
-// Include the database connection
+// Include database connection
 include $_SERVER['DOCUMENT_ROOT'] . '/Project-I-BCA/config/database.php';
+session_start(); // Assuming the user session is already started
 
-// Start the session
-session_start();
+// Validate POST data
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $item_id = intval($_POST['item_id']);
+    $quantity = intval($_POST['quantity']);
+    $user_id = $_SESSION['user_id'] ?? 0; // Fetch user ID from session
+    $table_id = $_COOKIE['table_number'] ?? 0; // Fetch table number from cookies
 
-// Check if user is logged in
-if (!isset($_SESSION['user_id'])) {
-    // Redirect to login if user is not logged in
-    header("Location: /Project-I-BCA/public/profile/login.php?redirect_to=/Project-I-BCA/homepage.php");
-    exit();
-}
+    // Ensure quantity is valid
+    if ($quantity < 1) {
+        die("Invalid quantity!");
+    }
 
-// Retrieve user ID from session
-$user_id = $_SESSION['user_id'];
+    // Fetch menu item details
+    $menu_item_sql = "SELECT price FROM menu_items WHERE id = $item_id";
+    $menu_item_result = $conn->query($menu_item_sql);
 
-// Check if table number is set via cookie
-if (!isset($_COOKIE['table_number'])) {
-    echo "Table number not set! Please scan the QR code to book a table.";
-    exit();
-}
+    if ($menu_item_result->num_rows > 0) {
+        $menu_item = $menu_item_result->fetch_assoc();
+        $total_price = $menu_item['price'] * $quantity; // Calculate total price
 
-// Retrieve the table number from the cookie
-$table_id = intval($_COOKIE['table_number']); // Ensure it's an integer
+        // Insert into `orders` table
+        $order_sql = "INSERT INTO orders (user_id, table_id, total_price, status) 
+                      VALUES ($user_id, $table_id, $total_price, 'pending')";
+        if ($conn->query($order_sql)) {
+            $order_id = $conn->insert_id; // Get the last inserted order ID
 
-// Check if an item ID is passed in the query string
-if (isset($_GET['item_id'])) {
-    $item_id = intval($_GET['item_id']); // Ensure it's an integer
+            // Insert into `order_items` table
+            $order_item_sql = "INSERT INTO order_items (order_id, menu_item_id, quantity, price) 
+                               VALUES ($order_id, $item_id, $quantity, {$menu_item['price']})";
 
-    // Fetch the details of the selected menu item
-    $stmt = $conn->prepare("SELECT * FROM menu_items WHERE id = ?");
-    $stmt->bind_param("i", $item_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-
-    if ($result->num_rows > 0) {
-        $item = $result->fetch_assoc();
-
-        // Calculate the total price (assume quantity is 1 for simplicity)
-        $total_price = $item['price'];
-        $status = 'pending'; // Initial order status
-
-        // Insert the order into the orders table
-        $order_stmt = $conn->prepare("INSERT INTO orders (user_id, table_id, total_price, status) VALUES (?, ?, ?, ?)");
-        $order_stmt->bind_param("iids", $user_id, $table_id, $total_price, $status);
-
-        if ($order_stmt->execute()) {
-            // Retrieve the newly created order ID
-            $order_id = $order_stmt->insert_id;
-
-            // Insert the ordered item into the order_items table
-            $quantity = 1; // Assuming quantity is 1
-            $order_item_stmt = $conn->prepare("INSERT INTO order_items (order_id, menu_item_id, quantity) VALUES (?, ?, ?)");
-            $order_item_stmt->bind_param("iii", $order_id, $item_id, $quantity);
-
-            if ($order_item_stmt->execute()) {
-                // Redirect to the order confirmation page
-                header("Location: order_confirmation.php?order_id=$order_id");
+            if ($conn->query($order_item_sql)) {
+                // Redirect to order confirmation
+                header("Location: /Project-I-BCA/public/orders/order_confirmation.php?order_id=$order_id");
                 exit();
             } else {
                 echo "Error adding item to order: " . $conn->error;
             }
         } else {
-            echo "Error placing order: " . $conn->error;
+            echo "Error creating order: " . $conn->error;
         }
     } else {
-        echo "Menu item not found!";
+        echo "Item not found!";
     }
 } else {
-    echo "No item selected!";
+    echo "Invalid request!";
 }
 
 $conn->close();

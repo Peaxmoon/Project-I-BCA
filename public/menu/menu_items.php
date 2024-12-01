@@ -145,6 +145,8 @@ $result = $conn->query($sql);
         <h1>Our Menu</h1>
         <br>
         <a href="/Project-I-BCA/homepage.php">Home Page</a>
+        <a href="/Project-I-BCA/public/dashboarduser.php">Dashboard</a>
+        <a href="../orders/receipt.php">Receipt</a>
     </header>
 
     <div class="container">
@@ -152,19 +154,25 @@ $result = $conn->query($sql);
             <?php if ($result->num_rows > 0): ?>
                 <?php while ($row = $result->fetch_assoc()): ?>
                     <div class="menu-item">
-                        <img src="/uploads/<?php echo htmlspecialchars($row['image']); ?>" alt="<?php echo htmlspecialchars($row['name']); ?>" class="menu-image">
-                        <div class="menu-details">
-                            <p class="menu-name"><?php echo htmlspecialchars($row['name']); ?></p>
-                            <p class="menu-description"><?php echo htmlspecialchars($row['description']); ?></p>
-                            <p class="menu-price">Rs. <?php echo htmlspecialchars($row['price']); ?></p>
-                            <div class="quantity-selector">
-                                <button class="quantity-btn" onclick="decreaseQuantity(this)">-</button>
-                                <input type="number" class="quantity-input" value="1" min="1" readonly>
-                                <button class="quantity-btn" onclick="increaseQuantity(this)">+</button>
-                            </div>
-                            <a href="/Project-I-BCA/public/orders/insert_order.php?item_id=<?php echo $row['id']; ?>" class="order-button">Order Now</a>
-                        </div>
-                    </div>
+    <img src="/uploads/<?php echo htmlspecialchars($row['image']); ?>" alt="<?php echo htmlspecialchars($row['name']); ?>" class="menu-image">
+    <div class="menu-details">
+        <p class="menu-name"><?php echo htmlspecialchars($row['name']); ?></p>
+        <p class="menu-description"><?php echo htmlspecialchars($row['description']); ?></p>
+        <p class="menu-price">Rs. <?php echo htmlspecialchars($row['price']); ?></p>
+
+        <!-- Quantity Selector Form -->
+        <form action="/Project-I-BCA/public/orders/insert_order.php" method="POST">
+            <input type="hidden" name="item_id" value="<?php echo $row['id']; ?>">
+            <div class="quantity-selector">
+                <button type="button" onclick="changeQuantity(this, -1)">-</button>
+                <input type="number" name="quantity" class="quantity-input" value="1" min="1">
+                <button type="button" onclick="changeQuantity(this, 1)">+</button>
+            </div>
+            <button type="submit" class="order-button">Order Now</button>
+        </form>
+    </div>
+</div>
+
                 <?php endwhile; ?>
             <?php else: ?>
                 <p>No menu items available.</p>
@@ -175,28 +183,33 @@ $result = $conn->query($sql);
     <footer>
         <p>&copy; 2024 Restaurant Management</p>
     </footer>
-    <script>
-        function increaseQuantity(button) {
-    const input = button.previousElementSibling; // Select the input field
-    input.value = parseInt(input.value) + 1;
+     <script> 
+//         function increaseQuantity(button) {
+//     const input = button.previousElementSibling; // Select the input field
+//     input.value = parseInt(input.value) + 1;
+// }
+
+// function decreaseQuantity(button) {
+//     const input = button.nextElementSibling; // Select the input field
+//     const currentValue = parseInt(input.value);
+//     if (currentValue > 1) {
+//         input.value = currentValue - 1;
+//     }
+// }
+
+// function placeOrder(itemId, orderButton) {
+//     const quantityInput = orderButton.previousElementSibling.querySelector('.quantity-input');
+//     const quantity = quantityInput.value;
+
+//     // Redirect to server with itemId and quantity (or send via AJAX)
+//     window.location.href = `/Project-I-BCA/public/orders/insert_order.php?item_id=${itemId}&quantity=${quantity}`;
+// }
+function changeQuantity(button, delta) {
+    const input = button.parentElement.querySelector('.quantity-input');
+    let value = parseInt(input.value) || 1;
+    value = Math.max(1, value + delta); // Prevent quantity below 1
+    input.value = value;
 }
-
-function decreaseQuantity(button) {
-    const input = button.nextElementSibling; // Select the input field
-    const currentValue = parseInt(input.value);
-    if (currentValue > 1) {
-        input.value = currentValue - 1;
-    }
-}
-
-function placeOrder(itemId, orderButton) {
-    const quantityInput = orderButton.previousElementSibling.querySelector('.quantity-input');
-    const quantity = quantityInput.value;
-
-    // Redirect to server with itemId and quantity (or send via AJAX)
-    window.location.href = `/Project-I-BCA/public/orders/insert_order.php?item_id=${itemId}&quantity=${quantity}`;
-}
-
     </script>
 </body>
 

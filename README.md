@@ -12,7 +12,14 @@ Additionally also maybe:
 also the label of food ingredients
 
 
-
+Steps :-
+first scan the qr code to get the table number
+then login to the website
+then click on the menu to see the menu items
+then click on the order now to order the food
+then click on the confirm order to confirm the order
+then click on the checkout to checkout the order
+then click on the print reciept to print the reciept
 
 
 Necessary Updates
@@ -24,8 +31,8 @@ Necessary Updates
 6. Make the table number cookie expire after 3 hour
 7. Make the new content be added from above in while showing the orders to admin cook or to users's order new element to top.
 8. Auto clear the content of table details of order details like food details, 
-9. to show orders new order at top.
-10. 
+<!-- 9. to show orders new order at top. -->
+10. Payment method is missing
 6. Send a confirmation email or SMS to users after a successful table booking.
         eg. Example email content: "Your table #3 has been successfully booked. Thank you!"
 7. Add a feature to allow users to cancel or reschedule their reservations.
