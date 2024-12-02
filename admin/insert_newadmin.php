@@ -12,9 +12,9 @@ if (!isset($_SESSION['admin_id'])) {
 }
 
 // Example data pratik enter new data for making new admin
-// $name = 'pratik';
-// $email = 'pratik@gmail.com';
-// $password = 'pratik'; // Plain text password (to be hashed)
+$name = 'pratik';
+$email = 'pratik@gmail.com';
+$password = 'pratik'; // Plain text password (to be hashed)
 $hashed_password = password_hash($password, PASSWORD_DEFAULT); // Hash the password
 
 // Insert into the admins table

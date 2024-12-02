@@ -1,0 +1,11 @@
+To pull
+git checkout main
+git pull origin main
+
+
+
+
+To push changes
+git add .
+git commit -m "commit"
+git push
