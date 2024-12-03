@@ -7,6 +7,10 @@ if (!isset($_SESSION['user_id'])) {
     header("Location: /Project-I-BCA/public/profile/login.php");
     exit();  // Ensure no further code is executed
 }
+if (!isset($_COOKIE['table_number'])) {
+    header("Location: /Project-I-BCA/scantable.php");
+    exit();
+}
 
 // If the user is logged in, display the dashboard
 ?>

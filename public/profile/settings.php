@@ -8,6 +8,11 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
+if (!isset($_COOKIE['table_number'])) {
+    header("Location: /Project-I-BCA/scantable.php");
+    exit();
+}
+
 // Handle password update
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user_id = $_SESSION['user_id'];

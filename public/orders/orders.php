@@ -1,10 +1,16 @@
 <?php
-session_start();
 include $_SERVER['DOCUMENT_ROOT'] . '/Project-I-BCA/config/database.php';
+session_start();
+
+if (!isset($_COOKIE['table_number'])) {
+    // Redirect to scantable.php if the cookie is not set
+    header("Location: /Project-I-BCA/scantable.php");
+    exit();
+}
 
 // Check if the user is logged in
 if (!isset($_SESSION['user_id'])) {
-    header("Location: ../profile/login.php");
+    header("Location: /Project-I-BCA/public/profile/login.php"); // Redirect to login page if not logged in
     exit();
 }
 

@@ -1,11 +1,18 @@
+<!-- my_receipt.php -->
 <?php
 // Include the database connection
 include $_SERVER['DOCUMENT_ROOT'] . '/Project-I-BCA/config/database.php';
 session_start();
 
+if (!isset($_COOKIE['table_number'])) {
+    // Redirect to scantable.php if the cookie is not set
+    header("Location: /Project-I-BCA/scantable.php");
+    exit();
+}
+
 // Check if the user is logged in
 if (!isset($_SESSION['user_id'])) {
-    header("Location: /Project-I-BCA/user/login.php"); // Redirect to login page if not logged in
+    header("Location: /Project-I-BCA/public/profile/login.php"); // Redirect to login page if not logged in
     exit();
 }
 
@@ -134,9 +141,10 @@ if ($result->num_rows > 0) {
                 <?php endwhile; ?>
             </tbody>
         </table>
-
+        
         <p class="grand-total">Grand Total: Rs. <?php echo htmlspecialchars($grand_total); ?></p>
-        <a href="/Project-I-BCA/public/orders/pay_online.php" class="pay-button">Pay Online</a>
+        <small>*You will be paying for the food only you ordered</small>
+        <a href="/Project-I-BCA/public/orders/payment.html" class="pay-button">Pay Online</a>
     <?php else: ?>
         <p>No orders found for today.</p>
     <?php endif; ?>

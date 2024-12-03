@@ -5,10 +5,15 @@ include $_SERVER['DOCUMENT_ROOT'] . '/Project-I-BCA/config/database.php';
 // Start the session
 session_start();
 
-// Check if user is logged in
+if (!isset($_COOKIE['table_number'])) {
+    // Redirect to scantable.php if the cookie is not set
+    header("Location: /Project-I-BCA/scantable.php");
+    exit();
+}
+
+// Check if the user is logged in
 if (!isset($_SESSION['user_id'])) {
-    // Redirect to login if user is not logged in
-    header("Location: login.php");
+    header("Location: /Project-I-BCA/public/profile/login.php"); // Redirect to login page if not logged in
     exit();
 }
 
@@ -53,7 +58,8 @@ if (isset($_GET['order_id'])) {
 
         // Add a "Go Back" button
         echo "<a href='../menu/menu_items.php'><button>Go Back to Menu</button></a>";
-        echo "<a href='receipt.php'><button>Go to Receipt</button></a>";
+        echo "<a href='my_receipt.php'><button>Go to my Receipt</button></a>";        
+        echo "<a href='my_table_receipt.php'><button>Go to table's Receipt</button></a>";
 
     } else {
         echo "<h1>Error</h1>";

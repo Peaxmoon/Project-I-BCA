@@ -2,6 +2,11 @@
 // Include database configuration
 require '../../config/database.php';
 
+if (!isset($_COOKIE['table_number'])) {
+    header("Location: /Project-I-BCA/scantable.php");
+    exit();
+}
+
 // Check if the form is submitted
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Get form data

@@ -1,8 +1,16 @@
 <?php
 // Include database connection
 include $_SERVER['DOCUMENT_ROOT'] . '/Project-I-BCA/config/database.php';
-session_start(); // Assuming the user session is already started
+session_start();
 
+if (!isset($_COOKIE['table_number'])) {
+    header("Location: /Project-I-BCA/scantable.php");
+    exit();
+}
+if (!isset($_SESSION['user_id'])) {
+    header("Location: /Project-I-BCA/public/profile/login.php"); // Redirect to login page if not logged in
+    exit();
+}
 // Validate POST data
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $item_id = intval($_POST['item_id']);

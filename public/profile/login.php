@@ -1,6 +1,11 @@
 <?php
-session_start();
 require '../../config/database.php';
+session_start();
+
+if (!isset($_COOKIE['table_number'])) {
+    header("Location: /Project-I-BCA/scantable.php");
+    exit();
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Get the form data

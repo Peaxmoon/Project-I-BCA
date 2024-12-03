@@ -1,0 +1,10 @@
+To push changes
+git add .
+git commit -m "commit"
+git push
+
+git status
+
+git pull origin main
+
+

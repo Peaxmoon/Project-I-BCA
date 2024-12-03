@@ -12,6 +12,23 @@ Additionally also maybe:
 also the label of food ingredients
 
 
+From sir to add:-
+1. Proper Billing and Status of the financial report condition of business overally for profit and loss calculation
+2. Fix payment issues if user has many tables or if there are multiple payments from single table.
+3. While Registering users to login send confirmation mail and confirm the mail
+4. Add user ratings and reviews system for dishes 
+5. 
+
+I will reserve this chair there will be unique code when entered one can pay for entire order
+but problem is i have to manage the payment status from any of the order
+if user selects same group code from different table then also one can pay for all the orders
+
+Payment yesto banaune payment ko duita option xa ki individual bill ko tirne or whole table ko tirne
+Khalti bata when payment is clicked khalti ko site ma redirect hunxa with cash already written and just put phone number and mip pin then pay for food personal or whole table if the user wants to pay for multiple users or multiple tables then he/she can just put phone number and mip pin or password to login and pay from redirected link.
+
+ 
+make changes so that user can also pay individually or in table also set the status for admin to select if paid or not in database it says status like paid or not and if paid already then the button will change it's word to paid. Also, admin panel update the admin code to  
+
 Steps :-
 first scan the qr code to get the table number
 then login to the website

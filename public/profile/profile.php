@@ -2,9 +2,12 @@
 session_start();
 require '../../config/database.php';// Include database connection
 
-// Check if the user is logged in
+if (!isset($_COOKIE['table_number'])) {
+    header("Location: /Project-I-BCA/scantable.php");
+    exit();
+}
 if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
+    header("Location: /Project-I-BCA/public/profile/login.php"); // Redirect to login page if not logged in
     exit();
 }
 

@@ -39,6 +39,8 @@ CREATE TABLE orders (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (table_id) REFERENCES tables(id) ON DELETE RESTRICT
 ) ENGINE=InnoDB;
+ALTER TABLE `orders`
+ADD COLUMN `payment_status` ENUM('not_paid', 'paid') DEFAULT 'not_paid';
 
 
 -- for order items
@@ -51,6 +53,9 @@ CREATE TABLE order_items (
     FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
     FOREIGN KEY (menu_item_id) REFERENCES menu_items(id) ON DELETE RESTRICT
 ) ENGINE=InnoDB;
+ALTER TABLE `order_items`
+ADD COLUMN `payment_status` ENUM('not_paid', 'paid') DEFAULT 'not_paid';
+
 
 -- for order admins
 CREATE TABLE `admins` (
@@ -59,6 +64,13 @@ CREATE TABLE `admins` (
     `password` VARCHAR(255) NOT NULL,         -- Password field (hashed)
     `name` VARCHAR(100) NOT NULL,             -- Name field (admin's name)
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- Timestamp when the admin is created
+);
+CREATE TABLE revenue_log (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    date DATE NOT NULL,
+    total_orders INT NOT NULL,
+    total_revenue DECIMAL(10, 2) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 
@@ -81,8 +93,7 @@ CREATE INDEX idx_table_id ON orders(table_id);
 CREATE INDEX idx_order_id ON order_items(order_id);
 CREATE INDEX idx_menu_item_id ON order_items(menu_item_id);
 
--- Test Foreign key behaviour
-DELETE FROM users WHERE id = 1; -- Check if related rows in `orders` are also deleted if ON DELETE CASCADE is set.
+
 
 -- To check foreign keys relation
 SELECT 

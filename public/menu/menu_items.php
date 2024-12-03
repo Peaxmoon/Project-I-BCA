@@ -2,11 +2,18 @@
 <?php
 // Include database connection
 include $_SERVER['DOCUMENT_ROOT'] . '/Project-I-BCA/config/database.php';
+session_start();
+
+if (!isset($_COOKIE['table_number'])) {
+    header("Location: /Project-I-BCA/scantable.php");
+    exit();
+}
 
 // Fetch menu items from the database
 $sql = "SELECT id, name, description, price, image FROM menu_items";
 $result = $conn->query($sql);
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">

@@ -28,7 +28,11 @@ $result = $conn->query($sql);
                 <td><?php echo $row['id']; ?></td>
                 <td><?php echo $row['name']; ?></td>
                 <td><?php echo $row['email']; ?></td>
+                <td>status</td>
+
             </tr>
         <?php endwhile; ?>
     </tbody>
+    status will be updated to all users if whole table is paid then user will also be paid.
+    it will be paid if payment was succcesful.
 </table>
