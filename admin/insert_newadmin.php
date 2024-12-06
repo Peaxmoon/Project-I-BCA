@@ -22,7 +22,7 @@ $sql = "INSERT INTO admins (name, email, password) VALUES ('$name', '$email', '$
 
 if (mysqli_query($conn, $sql)) {
     echo "Admin created successfully!";
-    header("Location: admindashboard.php");
+    // header("Location: admindashboard.php");
 } else {
     echo "Error: " . mysqli_error($conn);
 }

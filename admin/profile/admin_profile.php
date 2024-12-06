@@ -3,8 +3,8 @@ session_start();
 require '../../config/database.php';// Include database connection
 
 // Check if the user is logged in
-if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
+if (!isset($_SESSION['admin_id'])) {
+    header("Location: ../adminlogin.php");
     exit();
 }
 

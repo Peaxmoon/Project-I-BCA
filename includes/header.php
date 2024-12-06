@@ -94,7 +94,7 @@
 </head>
 <body>
     <header>
-        <div class="logo">SP Restaurant</div>
+        <div class="logo">TableServe Restaurant</div>
         <nav>
             <ul>
                 <li><a href="#menu">Menu</a></li>
@@ -103,10 +103,10 @@
             </ul>
         </nav>
         <div class="auth-links">
-            <a href="#login">Login</a>
-            <a href="#register">Register</a>
+            <a href="/Project-I-BCA/public/profile/login.php">Login</a>
+            <a href="/Project-I-BCA/public/profile/register.php">Register</a>
         </div>
-        <button class="order-now">Order Now</button>
+        <a href="Project-I-BCA/public/orders/orders.php">
+        <button class="order-now">Orders</button>
+        </a>
     </header>
-</body>
-</html>

@@ -29,7 +29,7 @@ if (!isset($_SESSION['admin_id'])) {
             <ul>
                 <li><a href="admindashboard.php">Dashboard</a></li>
                 <li><a href="./revenue_log/view_revenue.php">Revenue Report</a></li>
-                <li><a href="./profile/adminprofile.php">Profile</a></li>
+                <li><a href="./profile/admin_profile.php">Profile</a></li>
                 <li><a href="admin_logout.php">Logout</a></li> <!-- Logout link -->
                 <!-- <li><a href="insert_newadmin.php">Create admin</a></li> register link -->
             </ul>
