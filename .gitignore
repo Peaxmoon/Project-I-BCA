@@ -1,0 +1,13 @@
+
+
+# to ignore ui elements
+Homepage.php
+
+# css 
+public/assets/css/style.css
+# public/assets/js/script.css
+
+# headers 
+includes/footer.php
+includes/header.php
+

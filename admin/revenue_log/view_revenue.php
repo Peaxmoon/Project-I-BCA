@@ -1,34 +1,44 @@
 <?php
-include $_SERVER['DOCUMENT_ROOT'] . '/Project-I-BCA/config/database.php';
-
 session_start();
+include $_SERVER['DOCUMENT_ROOT'] . '/Project-I-BCA/config/database.php';
 
 // Check if admin is logged in
 if (!isset($_SESSION['admin_id'])) {
-    header("Location: admin_login.php");
+    header("Location: /Project-I-BCA/admin/login.php");
     exit();
 }
 
-// Default date range for current month
-$start_date = date('Y-m-01');
-$end_date = date('Y-m-t');
+// Get filter parameters
+$start_date = isset($_GET['start_date']) ? $_GET['start_date'] : date('Y-m-d');
+$end_date = isset($_GET['end_date']) ? $_GET['end_date'] : date('Y-m-d');
+$payment_method = isset($_GET['payment_method']) ? $_GET['payment_method'] : '';
 
-// If custom date range is selected
-if (isset($_POST['start_date']) && isset($_POST['end_date'])) {
-    $start_date = $_POST['start_date'];
-    $end_date = $_POST['end_date'];
+// Base query
+$sql = "SELECT rl.*, o.table_id, u.name as customer_name
+        FROM revenue_logs rl
+        JOIN orders o ON rl.order_id = o.id
+        JOIN users u ON o.user_id = u.id
+        WHERE DATE(rl.transaction_date) BETWEEN ? AND ?";
+
+$params = [$start_date, $end_date];
+$types = "ss";
+
+if ($payment_method) {
+    $sql .= " AND rl.payment_method = ?";
+    $params[] = $payment_method;
+    $types .= "s";
 }
 
-// Fetch revenue logs for the selected date range
-$sql = "SELECT id, amount, type, created_at FROM revenue_log 
-        WHERE created_at BETWEEN ? AND ?
-        ORDER BY created_at DESC";
+$sql .= " ORDER BY rl.transaction_date DESC";
 
 $stmt = $conn->prepare($sql);
-$stmt->bind_param('ss', $start_date, $end_date);
+$stmt->bind_param($types, ...$params);
 $stmt->execute();
 $result = $stmt->get_result();
 
+// Calculate totals
+$total_revenue = 0;
+$payment_methods = [];
 ?>
 
 <!DOCTYPE html>
@@ -36,73 +46,120 @@ $result = $stmt->get_result();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Revenue Logs</title>
+    <title>Revenue Report - Admin Panel</title>
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .filters {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
         table {
             width: 100%;
             border-collapse: collapse;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         th, td {
-            padding: 8px;
-            text-align: center;
-            border: 1px solid #ccc;
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
         }
-        .button {
+        th {
             background-color: #4CAF50;
             color: white;
-            padding: 10px 15px;
-            text-decoration: none;
+        }
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+        .summary {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: white;
             border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .export-btn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1>Revenue Logs</h1>
-        <a href="admin_dashboard.php" class="button">Back to Dashboard</a>
-    </header>
+    <h1>Revenue Report</h1>
 
-<br>
-<br>
-<br>
-<br>
-<br>
-
-    <!-- Filter Form -->
-    <form method="POST">
-        <label for="start_date">Start Date:</label>
-        <input type="date" name="start_date" value="<?php echo $start_date; ?>" required>
-        <label for="end_date">End Date:</label>
-        <input type="date" name="end_date" value="<?php echo $end_date; ?>" required>
-        <button type="submit" class="button">Filter</button>
-    </form>
+    <div class="filters">
+        <form method="GET">
+            <label>Start Date:
+                <input type="date" name="start_date" value="<?php echo htmlspecialchars($start_date); ?>">
+            </label>
+            <label>End Date:
+                <input type="date" name="end_date" value="<?php echo htmlspecialchars($end_date); ?>">
+            </label>
+            <label>Payment Method:
+                <select name="payment_method">
+                    <option value="">All Methods</option>
+                    <option value="khalti" <?php echo $payment_method === 'khalti' ? 'selected' : ''; ?>>Khalti</option>
+                    <option value="cash" <?php echo $payment_method === 'cash' ? 'selected' : ''; ?>>Cash</option>
+                </select>
+            </label>
+            <button type="submit">Filter</button>
+        </form>
+    </div>
 
     <table>
         <thead>
             <tr>
-                <th>Transaction ID</th>
-                <th>Amount (Rs.)</th>
-                <th>Type</th>
                 <th>Date</th>
+                <th>Order ID</th>
+                <th>Table</th>
+                <th>Customer</th>
+                <th>Amount</th>
+                <th>Payment Method</th>
             </tr>
         </thead>
         <tbody>
-            <?php if ($result->num_rows > 0): ?>
-                <?php while ($row = $result->fetch_assoc()): ?>
-                    <tr>
-                        <td><?php echo $row['id']; ?></td>
-                        <td><?php echo number_format($row['amount'], 2); ?></td>
-                        <td><?php echo htmlspecialchars($row['type']); ?></td>
-                        <td><?php echo $row['created_at']; ?></td>
-                    </tr>
-                <?php endwhile; ?>
-            <?php else: ?>
+            <?php while ($row = $result->fetch_assoc()): 
+                $total_revenue += $row['amount'];
+                $payment_methods[$row['payment_method']] = ($payment_methods[$row['payment_method'] ?? 0] ?? 0) + $row['amount'];
+            ?>
                 <tr>
-                    <td colspan="4">No revenue data found for the selected period.</td>
+                    <td><?php echo htmlspecialchars(date('Y-m-d H:i', strtotime($row['transaction_date']))); ?></td>
+                    <td><?php echo htmlspecialchars($row['order_id']); ?></td>
+                    <td><?php echo htmlspecialchars($row['table_id']); ?></td>
+                    <td><?php echo htmlspecialchars($row['customer_name']); ?></td>
+                    <td>Rs. <?php echo htmlspecialchars(number_format($row['amount'], 2)); ?></td>
+                    <td><?php echo htmlspecialchars(ucfirst($row['payment_method'])); ?></td>
                 </tr>
-            <?php endif; ?>
+            <?php endwhile; ?>
         </tbody>
     </table>
+
+    <div class="summary">
+        <h2>Summary</h2>
+        <p>Total Revenue: Rs. <?php echo number_format($total_revenue, 2); ?></p>
+        <?php foreach ($payment_methods as $method => $amount): ?>
+            <p><?php echo ucfirst($method); ?>: Rs. <?php echo number_format($amount, 2); ?></p>
+        <?php endforeach; ?>
+    </div>
+
+    <form method="POST" action="export_report.php">
+        <input type="hidden" name="start_date" value="<?php echo htmlspecialchars($start_date); ?>">
+        <input type="hidden" name="end_date" value="<?php echo htmlspecialchars($end_date); ?>">
+        <input type="hidden" name="payment_method" value="<?php echo htmlspecialchars($payment_method); ?>">
+        <button type="submit" class="export-btn">Export to Excel</button>
+    </form>
 </body>
 </html>
 

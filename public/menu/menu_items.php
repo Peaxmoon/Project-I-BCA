@@ -13,7 +13,24 @@ if (!isset($_COOKIE['table_number'])) {
 $sql = "SELECT id, name, description, price, image FROM menu_items";
 $result = $conn->query($sql);
 ?>
+<!-- Add this alert section -->
+<?php if (isset($_SESSION['success'])): ?>
+    <div class="alert success">
+        <?php 
+            echo $_SESSION['success'];
+            unset($_SESSION['success']);
+        ?>
+    </div>
+<?php endif; ?>
 
+<?php if (isset($_SESSION['error'])): ?>
+    <div class="alert error">
+        <?php 
+            echo $_SESSION['error'];
+            unset($_SESSION['error']);
+        ?>
+    </div>
+<?php endif; ?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -148,13 +165,11 @@ $result = $conn->query($sql);
 </head>
 
 <body>
-    <header>
-        <h1>Our Menu</h1>
-        <br>
-        <a href="/Project-I-BCA/homepage.php">Home Page</a>
-        <a href="/Project-I-BCA/public/dashboarduser.php">Dashboard</a>
-        <a href="../orders/receipt.php">Receipt</a>
-    </header>
+    <?php include '../../includes/header.php'; ?>
+
+
+    <h1>Our Menu</h1>
+
 
     <div class="container">
         <div class="menu-grid">
@@ -168,14 +183,14 @@ $result = $conn->query($sql);
         <p class="menu-price">Rs. <?php echo htmlspecialchars($row['price']); ?></p>
 
         <!-- Quantity Selector Form -->
-        <form action="/Project-I-BCA/public/orders/insert_order.php" method="POST">
+        <form onsubmit="return addToCart(this)" action="/Project-I-BCA/public/orders/insert_order.php" class="order-form">
             <input type="hidden" name="item_id" value="<?php echo $row['id']; ?>">
             <div class="quantity-selector">
                 <button type="button" onclick="changeQuantity(this, -1)">-</button>
                 <input type="number" name="quantity" class="quantity-input" value="1" min="1">
                 <button type="button" onclick="changeQuantity(this, 1)">+</button>
             </div>
-            <button type="submit" class="order-button">Order Now</button>
+            <button type="submit" class="order-button">Add to Cart</button>
         </form>
     </div>
 </div>
@@ -191,31 +206,114 @@ $result = $conn->query($sql);
         <p>&copy; 2024 Restaurant Management</p>
     </footer>
      <script> 
-//         function increaseQuantity(button) {
-//     const input = button.previousElementSibling; // Select the input field
-//     input.value = parseInt(input.value) + 1;
-// }
-
-// function decreaseQuantity(button) {
-//     const input = button.nextElementSibling; // Select the input field
-//     const currentValue = parseInt(input.value);
-//     if (currentValue > 1) {
-//         input.value = currentValue - 1;
-//     }
-// }
-
-// function placeOrder(itemId, orderButton) {
-//     const quantityInput = orderButton.previousElementSibling.querySelector('.quantity-input');
-//     const quantity = quantityInput.value;
-
-//     // Redirect to server with itemId and quantity (or send via AJAX)
-//     window.location.href = `/Project-I-BCA/public/orders/insert_order.php?item_id=${itemId}&quantity=${quantity}`;
-// }
 function changeQuantity(button, delta) {
     const input = button.parentElement.querySelector('.quantity-input');
     let value = parseInt(input.value) || 1;
-    value = Math.max(1, value + delta); // Prevent quantity below 1
+    value = Math.max(1, value + delta);
     input.value = value;
+}
+
+function addToCart(form) {
+    event.preventDefault(); // Prevent default form submission
+    
+    const formData = new FormData(form);
+    
+    // Use absolute path to insert_order.php
+    fetch('/Project-I-BCA/public/orders/insert_order.php', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'Accept': 'application/json'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            // Update cart count in header
+            const cartCount = document.querySelector('.cart-count');
+            if (cartCount) {
+                cartCount.textContent = data.cart_count;
+            }
+            
+            // Show success message
+            showNotification(data.message || 'Item added to cart!', 'success');
+            
+            // Reset quantity to 1
+            form.querySelector('.quantity-input').value = 1;
+        } else {
+            throw new Error(data.message || 'Failed to add item to cart');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification(error.message || 'Error adding item to cart', 'error');
+    });
+    
+    return false;
+}
+
+function showNotification(message, type = 'success') {
+    // Remove any existing notifications
+    const existingNotifications = document.querySelectorAll('.notification');
+    existingNotifications.forEach(notification => notification.remove());
+
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    // Add styles if they don't exist
+    if (!document.getElementById('notification-styles')) {
+        const style = document.createElement('style');
+        style.id = 'notification-styles';
+        style.textContent = `
+            .notification {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 25px;
+                border-radius: 4px;
+                color: white;
+                z-index: 1000;
+                animation: slideIn 0.5s ease-out;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+                min-width: 200px;
+                text-align: center;
+            }
+            
+            .notification.success {
+                background-color: #4CAF50;
+            }
+            
+            .notification.error {
+                background-color: #f44336;
+            }
+            
+            @keyframes slideIn {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+    
+    // Remove notification after 3 seconds
+    setTimeout(() => {
+        notification.style.animation = 'slideOut 0.5s ease-in forwards';
+        setTimeout(() => notification.remove(), 500);
+    }, 3000);
 }
     </script>
 </body>

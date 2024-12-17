@@ -1,16 +1,15 @@
 <?php
 
-$server = "localhost";
+$servername = "localhost";
 $username = "root";
 $password = "";
-$database = "tableserve";
+$dbname = "tableserve";
 
-// Establish a connection to the MySQL database using MySQLi
-$conn = mysqli_connect($server, $username, $password, $database);
+// Create connection
+$conn = new mysqli($servername, $username, $password, $dbname);
 
-// Check if the connection was successful
-if ($conn) {
-
-} else {
-    die("Connection failed: " . mysqli_connect_error());
+// Check connection silently - don't echo anything
+if ($conn->connect_error) {
+    error_log("Connection failed: " . $conn->connect_error);
+    die();
 }

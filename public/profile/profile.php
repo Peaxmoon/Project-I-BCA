@@ -22,14 +22,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = $_POST['name'];
     $email = $_POST['email'];
 
-    // Update user information in the database
-    $sql = "UPDATE users SET name = '$name', email = '$email' WHERE id = '$user_id'";
-    if (mysqli_query($conn, $sql)) {
-        $_SESSION['user_name'] = $name;  // Update the session variable for the new name
-        echo "Profile updated successfully!";
+    $sql = "UPDATE users SET name = ?, email = ? WHERE id = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("ssi", $name, $email, $_SESSION['user_id']);
+    
+    if ($stmt->execute()) {
+        $_SESSION['user_name'] = $name;
+        $_SESSION['success'] = "Profile updated successfully!";
     } else {
-        echo "Error updating profile: " . mysqli_error($conn);
+        $_SESSION['error'] = "Error updating profile: " . $conn->error;
     }
+    
+    header("Location: " . $_SERVER['PHP_SELF']);
+    exit();
 }
 
 mysqli_close($conn); // Close the database connection
@@ -41,6 +46,40 @@ mysqli_close($conn); // Close the database connection
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile</title>
+    <style>
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 4px;
+            color: white;
+            z-index: 1000;
+            animation: slideIn 0.5s ease-out;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            min-width: 200px;
+            text-align: center;
+        }
+        
+        .notification.success {
+            background-color: #4CAF50;
+        }
+        
+        .notification.error {
+            background-color: #f44336;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
 </head>
 <body>
     <h1>Edit Profile</h1>
@@ -56,5 +95,16 @@ mysqli_close($conn); // Close the database connection
         <button type="submit">Update Profile</button>
     </form>
     <a href="../dashboarduser.php">Back to Dashboard</a>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const notifications = document.querySelectorAll('.notification');
+        notifications.forEach(notification => {
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.5s ease-in forwards';
+                setTimeout(() => notification.remove(), 500);
+            }, 3000);
+        });
+    });
+    </script>
 </body>
 </html>

@@ -19,8 +19,9 @@ if (!isset($_SESSION['admin_id'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
-    <link rel="stylesheet" href="/public/assets/style.css"> <!-- Optional CSS -->
-    
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/Project-I-BCA/public/assets/css/style.css">
+    <!-- Remove any inline styles -->
 </head>
 <body>
 <header>

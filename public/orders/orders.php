@@ -32,8 +32,9 @@ mysqli_close($conn); // Close the database connection
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Your Orders</title>
 </head>
-<body>
-    <h1>Your Orders</h1>
+<body>  
+    <?php include '../../includes/header.php'; ?>
+    <h1>Your Previous Orders</h1>
 
     <?php if (count($orders) > 0): ?>
         <table>
@@ -61,6 +62,10 @@ mysqli_close($conn); // Close the database connection
     <?php endif; ?>
 
     <a href="../dashboarduser.php">Back to Dashboard</a>
-    <a href="receipt.php">Go to receipt</a>
+    <a href="my_receipt.php">Go My receipt</a>
+    <a href="my_table_receipt.php">Go Table receipt</a>
+
+    <?php include '../../includes/footer.php'; ?>
+
 </body>
 </html>

@@ -21,107 +21,64 @@ if (!isset($_COOKIE['table_number'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Dashboard</title>
-    <link rel="stylesheet" href="/public/assets/style.css"> <!-- Optional CSS file for styling -->
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-        }
-
-        header {
-            background-color: #333;
-            color: #fff;
-            padding: 10px 0;
-            text-align: center;
-        }
-
-        nav ul {
-            list-style-type: none;
-            padding: 0;
-        }
-
-        nav ul li {
-            display: inline;
-            margin: 0 15px;
-        }
-
-        nav ul li a {
-            color: #fff;
-            text-decoration: none;
-        }
-
-        main {
-            padding: 20px;
-        }
-
-        section {
-            background-color: #fff;
-            padding: 20px;
-            margin-bottom: 20px;
-            border-radius: 5px;
-        }
-
-        footer {
-            text-align: center;
-            padding: 10px 0;
-            background-color: #333;
-            color: #fff;
-            position: fixed;
-            width: 100%;
-            bottom: 0;
-        }
-    </style>
+    <title>User Dashboard - TableServe</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/Project-I-BCA/public/assets/css/style.css">
 </head>
 
 <body>
-    <header>
-        <h1>Welcome to Your Dashboard, <?= htmlspecialchars($_SESSION['user_name']); ?>!</h1> <!-- Safely output user data -->
-        <nav>
-            <ul>
-                <li><a href="../homepage.php">Home Page</a></li>
-                <li><a href="./profile/profile.php">Edit Profile</a></li>
-                <li><a href="./orders/orders.php">Your Orders</a></li>
-                <li><a href="./menu/menu_items.php">View Menu</a></li>
-                <li><a href="./profile/logout.php">Logout</a></li> <!-- Logout link -->
-            </ul>
-        </nav>
-    </header>
+    <?php include '../includes/header.php'; ?>
 
-    <main>
-        <section>
-            <h2>Account Information</h2>
-            <p>Name: <?= htmlspecialchars($_SESSION['user_name']); ?></p>
-            <p>User ID: <?= htmlspecialchars($_SESSION['user_id']); ?></p>
-            <h1>Your table number is ,
-                <?php
-                // Check if the 'table_number' cookie is set
-                if (isset($_COOKIE['table_number'])) {
-                    // Display the table number
-                    echo htmlspecialchars($_COOKIE['table_number']);
-                } else {
-                    echo "not assigned yet.";
-                }
-                ?>
-            </h1>
-            <!-- You can add more user-specific information here -->
-        </section>
+    <div class="main-content">
+        <div class="dashboard-container">
+            <section class="info-section">
+                <h2>Account Information</h2>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <p class="info-label">Name:</p>
+                        <p class="info-value"><?= htmlspecialchars($_SESSION['user_name']); ?></p>
+                    </div>
+                    <div class="info-item">
+                        <p class="info-label">User ID:</p>
+                        <p class="info-value"><?= htmlspecialchars($_SESSION['user_id']); ?></p>
+                    </div>
+                    <div class="info-item">
+                        <p class="info-label">Table Number:</p>
+                        <p class="info-value">
+                            <?php
+                            if (isset($_COOKIE['table_number'])) {
+                                echo htmlspecialchars($_COOKIE['table_number']);
+                            } else {
+                                echo "<span class='not-assigned'>Not assigned yet</span>";
+                            }
+                            ?>
+                        </p>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="quick-actions">
+                <h2>Quick Actions</h2>
+                <div class="action-cards">
+                    <a href="./profile/profile.php" class="action-card">
+                        <i class="fas fa-user"></i>
+                        <h3>Edit Profile</h3>
+                    </a>
+                    <a href="./orders/orders.php" class="action-card">
+                        <i class="fas fa-utensils"></i>
+                        <h3>View Orders</h3>
+                    </a>
+                    <a href="./profile/settings.php" class="action-card">
+                        <i class="fas fa-cog"></i>
+                        <h3>Settings</h3>
+                    </a>
+                </div>
+            </section>
+        </div>
+    </div>
 
-        <section>
-            <h2>Quick Actions</h2>
-            <ul>
-                <li><a href="./profile/profile.php">Edit Profile</a></li>
-                <li><a href="./orders/orders.php">View Your Orders</a></li>
-                <li><a href="./profile/settings.php">Account Settings</a></li>
-            </ul>
-        </section>
-    </main>
-
-    <footer>
-        <p>&copy; 2024 YourWebsite. All rights reserved.</p>
-    </footer>
+    <?php include '../includes/footer.php'; ?>
+    <script src="https://kit.fontawesome.com/your-kit-code.js" crossorigin="anonymous"></script>
 </body>
 
 </html>

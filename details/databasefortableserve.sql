@@ -65,12 +65,14 @@ CREATE TABLE `admins` (
     `name` VARCHAR(100) NOT NULL,             -- Name field (admin's name)
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- Timestamp when the admin is created
 );
-CREATE TABLE revenue_log (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    date DATE NOT NULL,
-    total_orders INT NOT NULL,
-    total_revenue DECIMAL(10, 2) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+-- Create revenue_logs table
+CREATE TABLE revenue_logs (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    order_id INT,
+    amount DECIMAL(10,2),
+    payment_method VARCHAR(50),
+    transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (order_id) REFERENCES orders(id)
 );
 
 
@@ -92,21 +94,3 @@ CREATE INDEX idx_user_id ON orders(user_id);
 CREATE INDEX idx_table_id ON orders(table_id);
 CREATE INDEX idx_order_id ON order_items(order_id);
 CREATE INDEX idx_menu_item_id ON order_items(menu_item_id);
-
-
-
--- To check foreign keys relation
-SELECT 
-    TABLE_NAME,
-    CONSTRAINT_NAME,
-    COLUMN_NAME,
-    REFERENCED_TABLE_NAME,
-    REFERENCED_COLUMN_NAME
-FROM 
-    INFORMATION_SCHEMA.KEY_COLUMN_USAGE
-WHERE 
-    TABLE_SCHEMA = 'tableserve'
-    AND REFERENCED_TABLE_NAME IS NOT NULL;
-
-
-

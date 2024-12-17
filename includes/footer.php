@@ -1,43 +1,32 @@
-<footer style="background-color: #333; color: #fff; padding: 20px 0; text-align: center;">
-    <div style="max-width: 1200px; margin: auto;">
-        <div style="display: flex; flex-wrap: wrap; justify-content: space-between; padding: 0 20px;">
-            <!-- About Section -->
-            <div style="flex: 1 1 300px; margin-bottom: 20px;">
-                <h3 style="color: #ffa500; margin-bottom: 10px;">About Us</h3>
-                <p style="line-height: 1.6;">
-                    Welcome to our restaurant! We serve delicious food with the best online ordering experience. 
-                </p>
-            </div>
+<?php
+// footer.php
+?>
 
-            <!-- Quick Links Section -->
-            <div style="flex: 1 1 300px; margin-bottom: 20px;">
-                <h3 style="color: #ffa500; margin-bottom: 10px;">Quick Links</h3>
-                <ul style="list-style: none; padding: 0; line-height: 2;">
-                    <li><a href="#menu" style="color: #fff; text-decoration: none;">Menu</a></li>
-                    <li><a href="#order" style="color: #fff; text-decoration: none;">Order Now</a></li>
-                    <li><a href="#contact" style="color: #fff; text-decoration: none;">Contact Us</a></li>
+<footer class="main-footer">
+    <div class="container">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>TableServe Restaurant</h3>
+                <p>Experience the finest dining with our digital ordering system.</p>
+            </div>
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="/Project-I-BCA/homepage.php">Home</a></li>
+                    <li><a href="/Project-I-BCA/public/menu/menu_items.php">Menu</a></li>
+                    <li><a href="/Project-I-BCA/about.php">About Us</a></li>
+                    <li><a href="/Project-I-BCA/contact.php">Contact</a></li>
                 </ul>
             </div>
-
-            <!-- Contact Section -->
-            <div style="flex: 1 1 300px; margin-bottom: 20px;">
-                <h3 style="color: #ffa500; margin-bottom: 10px;">Contact</h3>
-                <p style="line-height: 1.6;">📞 +977 9811223344</p>
-                <p style="line-height: 1.6;">📧 tableserverestaurant@.com</p>
-                <p style="line-height: 1.6;">📍 Itahari-8, Sunsari</p>
+            <div class="footer-section">
+                <h3>Contact Us</h3>
+                <p>Email: info@tableserve.com</p>
+                <p>Phone: +977 1234567890</p>
+                <p>Address: Kathmandu, Nepal</p>
             </div>
         </div>
-
-        <!-- Bottom Section -->
-        <div style="border-top: 1px solid #444; margin-top: 20px; padding-top: 10px; font-size: 14px;">
-            <p>&copy; 2024 Restaurant Order System.</span>.</p>
-            <p>
-                Follow us on 
-                <a href="#" style="color: #ffa500; text-decoration: none;">Facebook</a>, 
-                <a href="#" style="color: #ffa500; text-decoration: none;">Instagram</a>, 
-                <a href="#" style="color: #ffa500; text-decoration: none;">Twitter</a>
-            </p>
+        <div class="footer-bottom">
+            <p>&copy; <?php echo date('Y'); ?> TableServe Restaurant. All rights reserved.</p>
         </div>
     </div>
 </footer>
-
