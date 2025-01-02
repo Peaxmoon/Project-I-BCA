@@ -1,65 +1,74 @@
 <?php
 session_start();
-// Include database connection
-include $_SERVER['DOCUMENT_ROOT'] . '/Project-I-BCA/config/database.php';
+require '../../config/database.php';
 
 if (!isset($_SESSION['admin_id'])) {
-    // If no `admin_id` is found in the session, redirect to the login page
-    header("Location: /Project-I-BCA/admin/admin_login.php"); 
-    exit();  // Ensure no further code is executed
+    header("Location: ../admin_login.php");
+    exit();
 }
 
-// Define upload directory
-$upload_dir = $_SERVER['DOCUMENT_ROOT'] . '/uploads/'; // Use a relative path
+$message = '';
 
-// Ensure the directory exists, if not create it
-if (!is_dir($upload_dir)) {
-    mkdir($upload_dir, 0777, true);
-}
-
-// Check if form is submitted
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Retrieve form data
     $name = $_POST['name'];
     $description = $_POST['description'];
     $price = $_POST['price'];
-
-    // Handle file upload
-    $image = $_FILES['image']['name'];
-    $image_tmp = $_FILES['image']['tmp_name'];
-    $image_path = $upload_dir . basename($image);
-
-    // Check if file was uploaded successfully
-    if ($_FILES['image']['error'] === UPLOAD_ERR_OK) {
-        // Check if the file is a valid image
-        $image_ext = strtolower(pathinfo($image, PATHINFO_EXTENSION));
-        $valid_extensions = ['jpg', 'jpeg', 'png', 'gif'];
-
-        if (in_array($image_ext, $valid_extensions)) {
-            // Move the file to the uploads directory
-            if (move_uploaded_file($image_tmp, $image_path)) {
-                // Insert into database
-                $sql = "INSERT INTO menu_items (name, description, price, image) VALUES ('$name', '$description', '$price', '$image')";
-
-                if ($conn->query($sql) === TRUE) {
-                    // Redirect to admin dashboard on success
-                    header('Location: /Project-I-BCA/admin/admindashboard.php?page=menu');
-                    exit(); // Always call exit after a header redirect
-                } else {
-                    $message = "Error: " . $sql . "<br>" . $conn->error;
-                }
-            } else {
-                $message = "Failed to move uploaded file.";
-            }
-        } else {
-            $message = "Invalid image format. Only jpg, jpeg, png, and gif are allowed.";
-        }
-    } else {
-        $message = "Error uploading image: " . $_FILES['image']['error'];
+    
+    // Define target directory for images
+    $target_dir = $_SERVER['DOCUMENT_ROOT'] . "/Project-I-BCA/assets/images/menu/";
+    
+    // Create directory if it doesn't exist
+    if (!file_exists($target_dir)) {
+        mkdir($target_dir, 0777, true);
     }
 
-    // Close connection
-    $conn->close();
+    // Handle file upload
+    if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+        $file_tmp = $_FILES['image']['tmp_name'];
+        $file_type = strtolower(pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION));
+        
+        // Generate unique filename
+        $unique_filename = 'menu_' . uniqid() . '.' . $file_type;
+        $target_file = $target_dir . $unique_filename;
+        
+        // Check if file is an actual image
+        $check = getimagesize($file_tmp);
+        if ($check !== false) {
+            // Check file size (limit to 5MB)
+            if ($_FILES['image']['size'] <= 5000000) {
+                // Allow certain file formats
+                if (in_array($file_type, ['jpg', 'jpeg', 'png', 'webp'])) {
+                    if (move_uploaded_file($file_tmp, $target_file)) {
+                        // Store relative path in database
+                        $image_path = 'menu/' . $unique_filename;
+                        
+                        // Insert into database
+                        $sql = "INSERT INTO menu_items (name, description, price, image) VALUES (?, ?, ?, ?)";
+                        $stmt = $conn->prepare($sql);
+                        $stmt->bind_param("ssds", $name, $description, $price, $image_path);
+                        
+                        if ($stmt->execute()) {
+                            $message = "Menu item added successfully!";
+                        } else {
+                            $message = "Error: " . $conn->error;
+                            // Delete uploaded file if database insert fails
+                            unlink($target_file);
+                        }
+                    } else {
+                        $message = "Sorry, there was an error uploading your file.";
+                    }
+                } else {
+                    $message = "Sorry, only JPG, JPEG, PNG & WEBP files are allowed.";
+                }
+            } else {
+                $message = "Sorry, your file is too large. Maximum size is 5MB.";
+            }
+        } else {
+            $message = "File is not an image.";
+        }
+    } else {
+        $message = "Please select an image to upload.";
+    }
 }
 ?>
 
@@ -114,28 +123,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </style>
 </head>
 <body>
+    <h1>Insert Menu Item</h1>
 
-<h1>Insert Menu Item</h1>
+    <?php if ($message): ?>
+        <p class="message"><?php echo $message; ?></p>
+    <?php endif; ?>
 
-<?php if (isset($message)) : ?>
-    <p class="message"><?php echo $message; ?></p>
-<?php endif; ?>
+    <form action="insert_menu_item.php" method="POST" enctype="multipart/form-data">
+        <label for="dish-name">Enter Dish Name:</label>
+        <input type="text" id="dish-name" name="name" required><br>
 
-<form action="insert_menu_item.php" method="POST" enctype="multipart/form-data">
-    <label for="dish-name">Enter Dish Name:</label>
-    <input type="text" id="dish-name" name="name" required><br>
+        <label for="menu-description">Short Description:</label>
+        <input type="text" id="menu-description" name="description" required><br>
 
-    <label for="menu-description">Short Description:</label>
-    <input type="text" id="menu-description" name="description" required><br>
+        <label for="menu-price">Price:</label>
+        <input type="number" id="menu-price" name="price" step="0.01" required><br>
 
-    <label for="menu-price">Price:</label>
-    <input type="text" id="menu-price" name="price" required><br>
+        <label for="image">Upload Image:</label>
+        <input type="file" id="image" name="image" accept="image/*" required><br>
 
-    <label for="image">Upload Image:</label>
-    <input type="file" id="image" name="image" accept="image/*" required><br>
-
-    <button type="submit">Add New Item</button>
-</form>
-
+        <button type="submit">Add New Item</button>
+    </form>
 </body>
 </html>

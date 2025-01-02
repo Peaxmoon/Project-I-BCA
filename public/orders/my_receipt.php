@@ -123,6 +123,19 @@ if ($result->num_rows > 0) {
             text-align: center;
             margin: 20px 0;
         }
+        .actions .button {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 10px;
+            text-decoration: none;
+            color: white;
+            background-color: #007BFF;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .actions .button:hover {
+            background-color: #0056b3;
+        }
     </style>
 </head>
 <body>
@@ -195,6 +208,8 @@ if ($result->num_rows > 0) {
 
     <div class="actions">
         <a href="/Project-I-BCA/public/menu/menu_items.php" class="button">Back to Menu</a>
+        <a href="my_table_receipt.php" class="button">Go Table Receipt</a>
+        <a href="orders.php" class="button">Go Previous Orders</a>
         <button onclick="window.print()" class="button">Print Receipt</button>
     </div>
 </body>

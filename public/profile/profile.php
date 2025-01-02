@@ -1,43 +1,82 @@
 <?php
 session_start();
-require '../../config/database.php';// Include database connection
+require '../../config/database.php';
 
-if (!isset($_COOKIE['table_number'])) {
-    header("Location: /Project-I-BCA/scantable.php");
-    exit();
-}
 if (!isset($_SESSION['user_id'])) {
-    header("Location: /Project-I-BCA/public/profile/login.php"); // Redirect to login page if not logged in
+    header("Location: login.php");
     exit();
 }
 
-// Get the user's current information from the database
 $user_id = $_SESSION['user_id'];
-$sql = "SELECT * FROM users WHERE id = '$user_id'";
-$result = mysqli_query($conn, $sql);
-$user = mysqli_fetch_assoc($result);
 
-// Handle form submission for profile updates
+// Fetch user details
+$stmt = $conn->prepare("SELECT * FROM users WHERE id = ?");
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$user = $stmt->get_result()->fetch_assoc();
+
+// Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $name = $_POST['name'];
-    $email = $_POST['email'];
-
-    $sql = "UPDATE users SET name = ?, email = ? WHERE id = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ssi", $name, $email, $_SESSION['user_id']);
+    $name = trim($_POST['name']);
+    $email = trim($_POST['email']);
+    $current_password = $_POST['current_password'];
+    $new_password = $_POST['new_password'];
+    $confirm_password = $_POST['confirm_password'];
     
-    if ($stmt->execute()) {
-        $_SESSION['user_name'] = $name;
-        $_SESSION['success'] = "Profile updated successfully!";
-    } else {
-        $_SESSION['error'] = "Error updating profile: " . $conn->error;
+    $errors = [];
+    
+    // Validate inputs
+    if (strlen($name) < 2) {
+        $errors[] = "Name must be at least 2 characters long";
     }
     
-    header("Location: " . $_SERVER['PHP_SELF']);
-    exit();
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $errors[] = "Please enter a valid email address";
+    }
+    
+    // Check if email is already taken by another user
+    $stmt = $conn->prepare("SELECT id FROM users WHERE email = ? AND id != ?");
+    $stmt->bind_param("si", $email, $user_id);
+    $stmt->execute();
+    if ($stmt->get_result()->num_rows > 0) {
+        $errors[] = "Email is already taken";
+    }
+    
+    // If changing password
+    if (!empty($current_password)) {
+        if (!password_verify($current_password, $user['password'])) {
+            $errors[] = "Current password is incorrect";
+        }
+        
+        if (strlen($new_password) < 6) {
+            $errors[] = "New password must be at least 6 characters long";
+        }
+        
+        if ($new_password !== $confirm_password) {
+            $errors[] = "New passwords do not match";
+        }
+    }
+    
+    if (empty($errors)) {
+        // Update user information
+        if (!empty($new_password)) {
+            $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
+            $stmt = $conn->prepare("UPDATE users SET name = ?, email = ?, password = ? WHERE id = ?");
+            $stmt->bind_param("sssi", $name, $email, $hashed_password, $user_id);
+        } else {
+            $stmt = $conn->prepare("UPDATE users SET name = ?, email = ? WHERE id = ?");
+            $stmt->bind_param("ssi", $name, $email, $user_id);
+        }
+        
+        if ($stmt->execute()) {
+            $_SESSION['success'] = "Profile updated successfully!";
+            header("Location: profile.php");
+            exit();
+        } else {
+            $errors[] = "Error updating profile";
+        }
+    }
 }
-
-mysqli_close($conn); // Close the database connection
 ?>
 
 <!DOCTYPE html>
@@ -45,66 +84,128 @@ mysqli_close($conn); // Close the database connection
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile</title>
-    <style>
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 15px 25px;
-            border-radius: 4px;
-            color: white;
-            z-index: 1000;
-            animation: slideIn 0.5s ease-out;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            min-width: 200px;
-            text-align: center;
-        }
-        
-        .notification.success {
-            background-color: #4CAF50;
-        }
-        
-        .notification.error {
-            background-color: #f44336;
-        }
-        
-        @keyframes slideIn {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-    </style>
+    <title>Edit Profile - TableServe</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="../../assets/css/auth.css">
 </head>
 <body>
-    <h1>Edit Profile</h1>
-    <form action="profile.php" method="POST">
-        <label for="name">Name:</label>
-        <input type="text" id="name" name="name" value="<?= htmlspecialchars($user['name']); ?>" required>
-        <br>
+    <div class="page-wrapper">
+        <?php include '../../includes/header.php'; ?>
 
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" value="<?= htmlspecialchars($user['email']); ?>" required>
-        <br>
+        <div class="content-wrapper">
+            <div class="auth-container">
+                <a href="../dashboarduser.php" class="back-to-dashboard">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </a>
 
-        <button type="submit">Update Profile</button>
-    </form>
-    <a href="../dashboarduser.php">Back to Dashboard</a>
+                <div class="auth-header">
+                    <h1>Edit Profile</h1>
+                    <p>Update your account information</p>
+                </div>
+
+                <?php if (isset($_SESSION['success'])): ?>
+                    <div class="success-message">
+                        <i class="fas fa-check-circle"></i>
+                        <?php 
+                            echo $_SESSION['success'];
+                            unset($_SESSION['success']);
+                        ?>
+                    </div>
+                <?php endif; ?>
+
+                <?php if (!empty($errors)): ?>
+                    <ul class="error-list">
+                        <?php foreach ($errors as $error): ?>
+                            <li><i class="fas fa-exclamation-circle"></i> <?php echo htmlspecialchars($error); ?></li>
+                        <?php endforeach; ?>
+                    </ul>
+                <?php endif; ?>
+
+                <form method="POST" action="" id="profileForm">
+                    <div class="form-group">
+                        <label for="name">Full Name</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-user"></i>
+                            <input type="text" id="name" name="name" class="form-input" 
+                                   value="<?php echo htmlspecialchars($user['name']); ?>" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-envelope"></i>
+                            <input type="email" id="email" name="email" class="form-input" 
+                                   value="<?php echo htmlspecialchars($user['email']); ?>" required>
+                        </div>
+                    </div>
+
+                    <div class="password-section">
+                        <h2 class="section-title">Change Password</h2>
+                        <p class="text-muted">Leave blank if you don't want to change your password</p>
+
+                        <div class="form-group">
+                            <label for="current_password">Current Password</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-lock"></i>
+                                <input type="password" id="current_password" name="current_password" class="form-input">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="new_password">New Password</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-key"></i>
+                                <input type="password" id="new_password" name="new_password" class="form-input">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="confirm_password">Confirm New Password</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-key"></i>
+                                <input type="password" id="confirm_password" name="confirm_password" class="form-input">
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="register-btn">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <?php include '../../includes/footer.php'; ?>
+    </div>
+
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const notifications = document.querySelectorAll('.notification');
-        notifications.forEach(notification => {
-            setTimeout(() => {
-                notification.style.animation = 'slideOut 0.5s ease-in forwards';
-                setTimeout(() => notification.remove(), 500);
-            }, 3000);
+        document.getElementById('profileForm').addEventListener('submit', function(e) {
+            const newPassword = document.getElementById('new_password').value;
+            const confirmPassword = document.getElementById('confirm_password').value;
+            const currentPassword = document.getElementById('current_password').value;
+
+            if (newPassword || confirmPassword || currentPassword) {
+                if (newPassword.length < 6) {
+                    e.preventDefault();
+                    alert('New password must be at least 6 characters long');
+                    return;
+                }
+
+                if (newPassword !== confirmPassword) {
+                    e.preventDefault();
+                    alert('New passwords do not match');
+                    return;
+                }
+
+                if (!currentPassword) {
+                    e.preventDefault();
+                    alert('Please enter your current password to change password');
+                    return;
+                }
+            }
         });
-    });
     </script>
 </body>
 </html>

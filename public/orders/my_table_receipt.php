@@ -120,6 +120,23 @@ if ($result->num_rows > 0) {
     color: #ff4444; 
     font-weight: bold;
 }
+.links {
+    text-align: left;
+    margin-top: 20px;
+}
+.links a, .links button {
+    display: inline-block;
+    margin: 5px;
+    padding: 10px 20px;
+    text-decoration: none;
+    color: white;
+    background-color: #007BFF;
+    border-radius: 5px;
+    font-size: 16px;
+}
+.links a:hover, .links button:hover {
+    background-color: #0056b3;
+}
     </style>
 </head>
 <body>
@@ -127,9 +144,9 @@ if ($result->num_rows > 0) {
         <h1>Table Order Receipt</h1>
         <p>Hello, <?php echo htmlspecialchars($username); ?>!</p>
         <p>Table Number: <?php echo htmlspecialchars($_COOKIE['table_number']); ?></p>
-        <h2 style="color: <?php echo ($payment_status === 'paid') ? '#4CAF50' : '#ff4444'; ?>">
+        <!-- <h2 style="color: <?php echo ($payment_status === 'paid') ? '#4CAF50' : '#ff4444'; ?>">
             Table Payment Status: <?php echo ucfirst(htmlspecialchars($payment_status ?? 'unpaid')); ?>
-        </h2>
+        </h2> -->
     </header>
 
     <?php if ($result->num_rows > 0): ?>
@@ -193,9 +210,11 @@ if ($result->num_rows > 0) {
         <p>No orders found for today.</p>
     <?php endif; ?>
 
-    <div class="actions">
-        <a href="/Project-I-BCA/public/menu/menu_items.php" class="button">Back to Menu</a>
-        <button onclick="window.print()" class="button">Print Receipt</button>
+    <div class="links">
+        <a href="/Project-I-BCA/public/menu/menu_items.php" class="btn primary-btn">Back to Menu</a>
+        <a href="my_receipt.php" class="btn secondary-btn">My Receipt</a>
+        <a href="orders.php" class="btn secondary-btn">Go Previous Orders</a>
+        <button onclick="window.print()" class="btn secondary-btn">Print Receipt</button>
     </div>
 </body>
 </html>

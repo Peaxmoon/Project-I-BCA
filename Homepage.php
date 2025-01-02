@@ -12,63 +12,126 @@
     include './includes/header.php'; 
     ?>
 
-    <section id="hero">
-        <div class="hero-content">
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Bootstrap Example</title>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+  </head>
+  <body class="p-3 m-0 border-0 bd-example">
+
+    <!-- Example Code -->
+
+    <style>
+  .carousel-inner img {
+    width: 100%;
+    height: 600px;
+    object-fit: cover;
+  }
+</style>
+
+ <!-- Hero Section -->
+ <section id="hero" class="hero-section">
+
+    <div id="carouselExampleControls" class="carousel slide" data-bs-ride="carousel">
+  <div class="carousel-inner">
+    <div class="carousel-item active">
+      <img src="/Project-I-BCA/assets/images/pexels-amar-15119173.jpg" class="d-block w-100" alt="First slide">
+    </div>
+    <div class="carousel-item">
+      <img src="/Project-I-BCA/assets/images/pexels-rachel-claire-6127316.jpg" class="d-block w-100" alt="Second slide">
+    </div>
+    <div class="carousel-item">
+      <img src="/Project-I-BCA/assets/images/pexels-cottonbro-5371552.jpg" class="d-block w-100" alt="Third slide">
+    </div>
+  </div>
+  <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="prev">
+    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Previous</span>
+  </button>
+  <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="next">
+    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Next</span>
+  </button>
+</div>
+
+    
+    <!-- End Example Code -->
+  </body>
+</html>
+
+        <div class="hero-content container">
             <h1>Welcome to TableServe</h1>
             <p>Experience the finest dining with our digital ordering system</p>
             <?php if(isset($_SESSION['user_id'])): ?>
-                <a href="./public/menu/menu_items.php" class="btn">View Menu</a>
+                <a href="./public/menu/menu_items.php" class="btn primary-btn">View Menu</a>
             <?php else: ?>
-                <a href="./public/profile/login.php" class="btn">Login to Order</a>
+                <a href="./public/profile/login.php" class="btn secondary-btn">Login to Order</a>
             <?php endif; ?>
         </div>
     </section>
 
-    <section id="about" class="container">
-        <h2>About Us</h2>
-        <p>At TableServe Restaurant, we combine traditional dining with modern technology to provide you with the best possible experience. Our digital ordering system allows you to browse our menu and place orders directly from your table.</p>
-    </section>
-
-    <section id="features" class="container">
-        <h2>Our Services</h2>
-        <div class="features-grid">
-            <div class="feature">
-                <h3>Digital Menu</h3>
-                <p>Browse our complete menu with detailed descriptions and images.</p>
+    <!-- About Section -->
+    <section class="about-section">
+        <div class="about-container">
+            <div class="about-image">
+                <img src="/Project-I-BCA/assets/images/restaurant-image.jpg" alt="Our Restaurant">
             </div>
-            <div class="feature">
-                <h3>Table Service</h3>
-                <p>Scan your table's QR code for a personalized dining experience.</p>
-            </div>
-            <div class="feature">
-                <h3>Quick Ordering</h3>
-                <p>Place orders directly from your device without waiting for staff.</p>
+            <div class="about-content">
+                <h2>About TableServe</h2>
+                <p>Your restaurant description here...</p>
             </div>
         </div>
     </section>
 
-    <section id="menu-preview" class="container">
-        <h2>Popular Dishes</h2>
-        <div class="menu-grid">
-            <?php
-            include './config/database.php';
-            $sql = "SELECT * FROM menu_items LIMIT 3";
-            $result = $conn->query($sql);
-            
-            if ($result->num_rows > 0) {
-                while($row = $result->fetch_assoc()) {
-                    echo "<div class='menu-item'>";
-                    echo "<img src='/uploads/" . htmlspecialchars($row['image']) . "' alt='" . htmlspecialchars($row['name']) . "'>";
-                    echo "<h3>" . htmlspecialchars($row['name']) . "</h3>";
-                    echo "<p>" . htmlspecialchars($row['description']) . "</p>";
-                    echo "<p class='price'>Rs. " . htmlspecialchars($row['price']) . "</p>";
-                    echo "</div>";
-                }
-            }
-            ?>
+    <!-- Featured Section -->
+    <section class="featured-section">
+        <div class="featured-grid">
+            <!-- Repeat for each feature -->
+            <div class="featured-card">
+                <div class="featured-image">
+                    <img src="/Project-I-BCA/assets/images/feature-image.jpg" alt="Feature">
+                </div>
+                <div class="featured-content">
+                    <h3>Special Dishes</h3>
+                    <p>Description of the feature...</p>
+                </div>
+            </div>
         </div>
-        <div class="cta">
-            <a href="./public/menu/menu_items.php" class="btn">View Full Menu</a>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats-section">
+        <div class="stats-container">
+            <div class="stat-item">
+                <div class="stat-number">5000+</div>
+                <div class="stat-label">Happy Customers</div>
+            </div>
+            <!-- Add more stat items -->
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="testimonials-section">
+        <div class="container">
+            <div class="testimonial-card">
+                <div class="testimonial-content">
+                    "Customer testimonial here..."
+                </div>
+                <div class="testimonial-author">
+                    <div class="author-image">
+                        <img src="/Project-I-BCA/assets/images/author-image.jpg" alt="Author">
+                    </div>
+                    <div class="author-info">
+                        <h4>Customer Name</h4>
+                        <p>Regular Customer</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -76,4 +139,3 @@
     <script src="./assets/js/script.js"></script>
 </body>
 </html>
-

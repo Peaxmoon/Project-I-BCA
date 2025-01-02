@@ -20,12 +20,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user = mysqli_fetch_assoc($result);
 
     // Verify the old password
-    if (password_verify($old_password, $user['password'])) {
-        // Hash the new password
-        $new_password_hashed = password_hash($new_password, PASSWORD_BCRYPT);
-
+    if ($old_password === $user['password']) {
         // Update the password in the database
-        $sql = "UPDATE users SET password = '$new_password_hashed' WHERE id = '$user_id'";
+        $sql = "UPDATE users SET password = '$new_password' WHERE id = '$user_id'";
         if (mysqli_query($conn, $sql)) {
             echo "Password updated successfully!";
         } else {
@@ -48,7 +45,7 @@ mysqli_close($conn); // Close the database connection
 </head>
 <body>
     <h1>Change Password</h1>
-    <form action="settings.php" method="POST">
+    <form action="admin_settings.php" method="POST">
         <label for="old_password">Old Password:</label>
         <input type="password" id="old_password" name="old_password" required>
         <br>

@@ -1,57 +1,122 @@
 <?php
-session_start();
-require '../../config/database.php';// Include database connection
-
-// Check if the user is logged in
-if (!isset($_SESSION['admin_id'])) {
-    header("Location: ../adminlogin.php");
+if (!defined('INCLUDED_FROM_DASHBOARD')) {
+    header("Location: ../admindashboard.php?page=profile");
     exit();
 }
 
-// Get the user's current information from the database
-$user_id = $_SESSION['user_id'];
-$sql = "SELECT * FROM users WHERE id = '$user_id'";
-$result = mysqli_query($conn, $sql);
-$user = mysqli_fetch_assoc($result);
+// Fetch admin details
+$admin_id = $_SESSION['admin_id'];
+$sql = "SELECT * FROM admins WHERE id = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $admin_id);
+$stmt->execute();
+$result = $stmt->get_result();
+$admin = $result->fetch_assoc();
 
-// Handle form submission for profile updates
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $name = $_POST['name'];
-    $email = $_POST['email'];
-
-    // Update user information in the database
-    $sql = "UPDATE users SET name = '$name', email = '$email' WHERE id = '$user_id'";
-    if (mysqli_query($conn, $sql)) {
-        $_SESSION['user_name'] = $name;  // Update the session variable for the new name
-        echo "Profile updated successfully!";
+// Handle profile update
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
+    $name = trim($_POST['name']);
+    $email = trim($_POST['email']);
+    $new_password = trim($_POST['new_password']);
+    
+    $update_sql = "UPDATE admins SET name = ?, email = ?";
+    $params = array($name, $email);
+    $types = "ss";
+    
+    if (!empty($new_password)) {
+        $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
+        $update_sql .= ", password = ?";
+        $params[] = $hashed_password;
+        $types .= "s";
+    }
+    
+    $update_sql .= " WHERE id = ?";
+    $params[] = $admin_id;
+    $types .= "i";
+    
+    $stmt = $conn->prepare($update_sql);
+    $stmt->bind_param($types, ...$params);
+    
+    if ($stmt->execute()) {
+        $_SESSION['admin_name'] = $name;
+        $success_message = "Profile updated successfully!";
+        // Refresh admin data
+        $result = $conn->query("SELECT * FROM admins WHERE id = $admin_id");
+        $admin = $result->fetch_assoc();
     } else {
-        echo "Error updating profile: " . mysqli_error($conn);
+        $error_message = "Error updating profile.";
     }
 }
-
-mysqli_close($conn); // Close the database connection
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile</title>
-</head>
-<body>
-    <h1>Edit Profile</h1>
-    <form action="profile.php" method="POST">
-        <label for="name">Name:</label>
-        <input type="text" id="name" name="name" value="<?= htmlspecialchars($user['name']); ?>" required>
-        <br>
+<div class="admin-profile-container">
+    <div class="profile-header">
+        <div class="profile-avatar">
+            <i class="fas fa-user-circle"></i>
+        </div>
+        <div class="profile-title">
+            <h2>Admin Profile</h2>
+            <p>Manage your account settings</p>
+        </div>
+    </div>
 
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" value="<?= htmlspecialchars($user['email']); ?>" required>
-        <br>
+    <?php if (isset($success_message)): ?>
+        <div class="admin-message success">
+            <?php echo $success_message; ?>
+        </div>
+    <?php endif; ?>
 
-        <button type="submit">Update Profile</button>
-    </form>
-    <a href="../dashboarduser.php">Back to Dashboard</a>
-</body>
-</html>
+    <?php if (isset($error_message)): ?>
+        <div class="admin-message error">
+            <?php echo $error_message; ?>
+        </div>
+    <?php endif; ?>
+
+    <div class="profile-card">
+        <form method="POST" class="profile-form">
+            <div class="form-group">
+                <label for="name">Full Name</label>
+                <div class="input-with-icon">
+                    <i class="fas fa-user"></i>
+                    <input type="text" id="name" name="name" value="<?php echo htmlspecialchars($admin['name']); ?>" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <div class="input-with-icon">
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" id="email" name="email" value="<?php echo htmlspecialchars($admin['email']); ?>" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="new_password">New Password (leave blank to keep current)</label>
+                <div class="input-with-icon">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="new_password" name="new_password" minlength="6">
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" name="update_profile" class="admin-btn">
+                    <i class="fas fa-save"></i> Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="profile-card">
+        <h3>Account Information</h3>
+        <div class="info-grid">
+            <div class="info-item">
+                <span class="info-label">Account Type</span>
+                <span class="info-value">Administrator</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Last Login</span>
+                <span class="info-value"><?php echo date('Y-m-d H:i:s'); ?></span>
+            </div>
+        </div>
+    </div>
+</div>

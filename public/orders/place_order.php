@@ -29,6 +29,20 @@ try {
     $stmt = $conn->prepare($item_sql);
     
     foreach ($_SESSION['cart'] as $item) {
+        // Check if menu_item_id exists in menu_items table
+        $check_sql = "SELECT id FROM menu_items WHERE id = ?";
+        $check_stmt = $conn->prepare($check_sql);
+        $check_stmt->bind_param("i", $item['item_id']);
+        $check_stmt->execute();
+        $check_result = $check_stmt->get_result();
+        
+        if ($check_result->num_rows === 0) {
+            throw new Exception("Menu item ID " . $item['item_id'] . " does not exist.");
+        }
+
+        // Log the menu_item_id for debugging
+        error_log("Inserting item with menu_item_id: " . $item['item_id']);
+        
         $stmt->bind_param("iiid", $order_id, $item['item_id'], $item['quantity'], $item['price']);
         $stmt->execute();
     }
@@ -41,14 +55,18 @@ try {
     
     // Set success message
     $_SESSION['success'] = "Order placed successfully!";
-    header("Location: ../menu/menu_items.php");
+    header("Location: order_confirmation.php?order_id=" . $order_id);
     exit();
     
 } catch (Exception $e) {
     // Rollback transaction on error
     $conn->rollback();
     $_SESSION['error'] = "Error placing order: " . $e->getMessage();
+    
+    // Log the error message for debugging
+    error_log("Order placement error: " . $e->getMessage());
+    
     header("Location: order_confirmation.php");
     exit();
 }
-?> 
+?>

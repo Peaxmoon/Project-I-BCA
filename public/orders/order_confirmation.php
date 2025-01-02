@@ -2,7 +2,44 @@
 session_start();
 include $_SERVER['DOCUMENT_ROOT'] . '/Project-I-BCA/config/database.php';
 
-if (!isset($_SESSION['user_id']) || !isset($_SESSION['cart']) || empty($_SESSION['cart'])) {
+if (!isset($_SESSION['user_id'])) {
+    $_SESSION['error'] = "You must be logged in to confirm an order.";
+    header("Location: ../menu/menu_items.php");
+    exit();
+}
+
+if (isset($_SESSION['error'])) {
+    echo "<p>Error: " . $_SESSION['error'] . "</p>";
+    unset($_SESSION['error']);
+}
+
+if (isset($_SESSION['success'])) {
+    echo "<p>Success: " . $_SESSION['success'] . "</p>";
+    unset($_SESSION['success']);
+}
+
+// Check if the order was placed
+$order_id = $_GET['order_id'] ?? null;
+if ($order_id) {
+    $order_sql = "SELECT * FROM orders WHERE id = ?";
+    $stmt = $conn->prepare($order_sql);
+    $stmt->bind_param("i", $order_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $order = $result->fetch_assoc();
+
+    if ($order) {
+        echo "<p>Order ID: " . $order['id'] . "</p>";
+        echo "<p>Total Price: " . $order['total_price'] . "</p>";
+        echo "<p>Status: " . $order['status'] . "</p>";
+    } else {
+        echo "<p>No order found with ID: " . htmlspecialchars($order_id) . "</p>";
+    }
+} else {
+    echo "<p>No order ID provided.</p>";
+}
+
+if (!isset($_SESSION['cart']) || empty($_SESSION['cart'])) {
     header("Location: /Project-I-BCA/public/menu/menu_items.php");
     exit();
 }
