@@ -31,31 +31,43 @@ mysqli_close($conn); // Close the database connection
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Your Orders</title>
-    <link rel="stylesheet" href="/Project-I-BCA/assets/css/style.css">
 </head>
 <body>  
     <?php include '../../includes/header.php'; ?>
-    <div class="container">
-        <h1 class="page-title">Your Orders</h1>
-        <div class="orders-list">
-            <?php if (count($orders) > 0): ?>
+    <h1>Your Previous Orders</h1>
+
+    <?php if (count($orders) > 0): ?>
+        <table>
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>Total Price</th>
+                    <th>Status</th>
+                    <th>Payment Status</th>
+                    <th>Order Date</th>
+                </tr>
+            </thead>
+            <tbody>
                 <?php foreach ($orders as $order): ?>
-                    <div class="order-item">
-                        <h3>Order #<?= htmlspecialchars($order['id']); ?></h3>
-                        <p><strong>Date:</strong> <?= htmlspecialchars($order['created_at']); ?></p>
-                        <p><strong>Total:</strong> $<?= htmlspecialchars($order['total_price']); ?></p>
-                        <p><strong>Status:</strong> <?= htmlspecialchars($order['status']); ?></p>
-                        <div class="links">
-                            <a href="order_details.php?id=<?= htmlspecialchars($order['id']); ?>" class="btn primary-btn">View Details</a>
-                            <a href="cancel_order.php?id=<?= htmlspecialchars($order['id']); ?>" class="btn secondary-btn">Cancel Order</a>
-                        </div>
-                    </div>
+                    <tr>
+                        <td><?= htmlspecialchars($order['id']); ?></td>
+                        <td>₹<?= htmlspecialchars($order['total_price']); ?></td>
+                        <td><?= htmlspecialchars($order['status']); ?></td>
+                        <td><?= htmlspecialchars($order['payment_status']); ?></td>
+                        <td><?= htmlspecialchars($order['created_at']); ?></td>
+                    </tr>
                 <?php endforeach; ?>
-            <?php else: ?>
-                <p>You have no orders yet.</p>
-            <?php endif; ?>
-        </div>
-    </div>
+            </tbody>
+        </table>
+    <?php else: ?>
+        <p>You have no orders yet.</p>
+    <?php endif; ?>
+
+    <a href="../menu/menu_items.php">Back to Menu</a>
+    <a href="my_receipt.php">Go My receipt</a>
+    <a href="my_table_receipt.php">Go Table receipt</a>
+
     <?php include '../../includes/footer.php'; ?>
+
 </body>
 </html>

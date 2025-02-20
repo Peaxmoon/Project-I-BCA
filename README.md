@@ -66,6 +66,7 @@ then click on the print reciept to print the reciept
 29. make changes so that user can also pay individually or in table also set the status for admin to select if paid or not in database it says status like paid or not and if paid already then the button will change it's word to paid. Also, admin panel update the admin code to ✅
 30. Payment yesto banaune payment ko duita option xa ki individual bill ko tirne or whole table ko tirne
 Khalti bata when payment is clicked khalti ko site ma redirect hunxa with cash already written and just put phone number and mip pin then pay for food personal or whole table if the user wants to pay for multiple users or multiple tables then he/she can just put phone number and mip pin or password to login and pay from redirected link.✅
+31. If network is not connected and tries to pay send error of network connection
 
 ## From sir to add:-
 1. Proper Billing and Status of the financial report condition of business overally for profit and loss calculation. (only total revenue ✅)Business Operations (inventory, analytics, staff interface)

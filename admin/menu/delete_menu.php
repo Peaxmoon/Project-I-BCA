@@ -1,15 +1,16 @@
 <?php
 session_start();
-// Include database connection
 include $_SERVER['DOCUMENT_ROOT'] . '/Project-I-BCA/config/database.php';
+
 if (!isset($_SESSION['admin_id'])) {
-    // If no `admin_id` is found in the session, redirect to the login page
-    header("Location: /Project-I-BCA/admin/admin_login.php"); 
-    exit();  // Ensure no further code is executed
+    header("Location: /Project-I-BCA/admin/admin_login.php");
+    exit();
 }
-// Check if an `item_id` is passed via the GET method
+
+$message = '';
+
 if (isset($_GET['item_id'])) {
-    $item_id = intval($_GET['item_id']); // Get the item_id from the URL
+    $item_id = intval($_GET['item_id']);
 
     // Fetch the item to get its image filename (if applicable)
     $fetch_sql = "SELECT image FROM menu_items WHERE id = $item_id";
@@ -24,8 +25,8 @@ if (isset($_GET['item_id'])) {
 
         if ($conn->query($delete_sql) === TRUE) {
             // Remove the image file from the server if it exists
-            if (!empty($image) && file_exists($_SERVER['DOCUMENT_ROOT'] . "/uploads/" . $image)) {
-                unlink($_SERVER['DOCUMENT_ROOT'] . "/uploads/" . $image);
+            if (!empty($image) && file_exists($_SERVER['DOCUMENT_ROOT'] . "/Project-I-BCA/assets/images/" . $image)) {
+                unlink($_SERVER['DOCUMENT_ROOT'] . "/Project-I-BCA/assets/images/" . $image);
             }
             $message = "Menu item deleted successfully!";
         } else {
@@ -38,10 +39,7 @@ if (isset($_GET['item_id'])) {
     $message = "No menu item specified!";
 }
 
-// Close the database connection
-$conn->close();
-
-// Redirect back to the menu list page with a message
-header("Location: /Project-I-BCA/admin/menu/menu_list.php?message=" . urlencode($message));
-exit;
+// Redirect back to the menu list with a message
+header("Location: menu_list.php?message=" . urlencode($message));
+exit();
 ?>

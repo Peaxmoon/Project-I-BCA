@@ -1,5 +1,3 @@
-
-
 -- to create users
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -15,9 +13,35 @@ CREATE TABLE menu_items (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     description TEXT,
+    -- image and category_id is also in database 
+    -- image	varchar(255)	utf8mb4_general_ci	
+    -- category_id Index	int(11)
     price DECIMAL(10, 2) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
+-- Update menu_items table to reference menu_categories
+ALTER TABLE menu_items
+DROP FOREIGN KEY menu_items_ibfk_1,
+ADD FOREIGN KEY (category_id) REFERENCES menu_categories(id);
+
+
+-- Create menu_categories table
+CREATE TABLE menu_categories (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+-- Insert sample categories
+INSERT INTO menu_categories (name, description) VALUES
+('Appetizers', 'Start your meal with these delicious starters'),
+('Main Course', 'Hearty and filling main dishes'),
+('Desserts', 'Sweet treats to end your meal'),
+('Beverages', 'Refreshing drinks and beverages');
+
+
+
 
 -- for table
 CREATE TABLE tables (
@@ -34,7 +58,7 @@ CREATE TABLE orders (
     user_id INT NOT NULL,
     table_id INT NOT NULL,
     total_price DECIMAL(10, 2) NOT NULL,
-    status ENUM('pending', 'completed', 'canceled') DEFAULT 'pending',
+    status ENUM('pending', 'completed', 'cancelled') DEFAULT 'pending',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (table_id) REFERENCES tables(id) ON DELETE RESTRICT
@@ -71,6 +95,7 @@ CREATE TABLE revenue_logs (
     order_id INT,
     amount DECIMAL(10,2),
     payment_method VARCHAR(50),
+    payment_ref	varchar(255),
     transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (order_id) REFERENCES orders(id)
 );
@@ -84,41 +109,6 @@ CREATE TABLE food_ratings (
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (menu_item_id) REFERENCES menu_items(id)
 );
-
--- Create categories table
-CREATE TABLE categories (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(100) NOT NULL,
-    description TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- Insert sample categories
-INSERT INTO categories (name, description) VALUES
-('Appetizers', 'Start your meal with these delicious starters'),
-('Main Course', 'Hearty and filling main dishes'),
-('Desserts', 'Sweet treats to end your meal'),
-('Beverages', 'Refreshing drinks and beverages'),
-('Soups', 'Hot and comforting soups'),
-('Salads', 'Fresh and healthy salads');
-
--- Add category_id to menu_items if not exists
-ALTER TABLE menu_items
-ADD COLUMN category_id INT,
-ADD FOREIGN KEY (category_id) REFERENCES categories(id);
-
--- Update existing menu items with categories
-UPDATE menu_items SET category_id = 1 WHERE name LIKE '%appetizer%' OR name LIKE '%starter%';
-UPDATE menu_items SET category_id = 2 WHERE name LIKE '%main%' OR name LIKE '%curry%' OR name LIKE '%rice%';
-UPDATE menu_items SET category_id = 3 WHERE name LIKE '%dessert%' OR name LIKE '%sweet%';
-UPDATE menu_items SET category_id = 4 WHERE name LIKE '%drink%' OR name LIKE '%beverage%';
-UPDATE menu_items SET category_id = 5 WHERE name LIKE '%soup%';
-UPDATE menu_items SET category_id = 6 WHERE name LIKE '%salad%';
-
--- Set default category for any remaining items
-UPDATE menu_items SET category_id = 2 WHERE category_id IS NULL;
-
-
 
 
 -- Foreign key constaraints

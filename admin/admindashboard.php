@@ -84,7 +84,7 @@ $stats['total_revenue'] = $row['total'] ?? 0;
                     <i class="fas fa-user"></i>
                     <span>Profile</span>
                 </a>
-                <a href="admin_logout.php" class="action-btn">
+                <a href="#" onclick="confirmAdminLogout(event)" class="action-btn">
                     <i class="fas fa-sign-out-alt"></i>
                     <span>Logout</span>
                 </a>
@@ -190,6 +190,7 @@ $stats['total_revenue'] = $row['total'] ?? 0;
                                 include './users/user_list.php';
                                 break;
                             case 'orders':
+                                define('INCLUDED_FROM_DASHBOARD', true);
                                 include './orders/orders_list.php';
                                 break;
                             case 'revenue':
@@ -212,6 +213,15 @@ $stats['total_revenue'] = $row['total'] ?? 0;
             </div>
         </div>
     </div>
+
+    <script>
+    function confirmAdminLogout(event) {
+        event.preventDefault();
+        if (confirm('Are you sure you want to logout from admin dashboard?')) {
+            window.location.href = 'admin_logout.php';
+        }
+    }
+    </script>
 </body>
 </html>
 <?php include '../includes/footer.php'; ?>

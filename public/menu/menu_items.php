@@ -6,7 +6,7 @@ require_once '../../config/database.php';
 // Fetch all categories
 $stmt = $conn->prepare("
     SELECT c.*, COUNT(m.id) as item_count 
-    FROM categories c 
+    FROM menu_categories c 
     LEFT JOIN menu_items m ON c.id = m.category_id 
     GROUP BY c.id
 ");
@@ -24,7 +24,7 @@ $query = "
         ROUND(AVG(r.rating), 1) as average_rating,
         COUNT(r.id) as rating_count
     FROM menu_items m
-    LEFT JOIN categories c ON m.category_id = c.id
+    LEFT JOIN menu_categories c ON m.category_id = c.id
     LEFT JOIN food_ratings r ON m.id = r.menu_item_id
 ";
 
@@ -50,19 +50,20 @@ $menu_items = $stmt->get_result();
     <title>Menu - TableServe</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="../../assets/css/style.css">
+    <script src="../../assets/js/notifications.js"></script>
     <style>
         .menu-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 2rem;
-            padding: 2rem;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+            padding: 1.5rem;
         }
 
         .menu-item {
             background: #fff;
-            border-radius: 10px;
+            border-radius: 8px;
             overflow: hidden;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             transition: transform 0.3s ease;
         }
 
@@ -72,12 +73,12 @@ $menu_items = $stmt->get_result();
 
         .menu-image {
             width: 100%;
-            height: 200px;
+            height: 150px;
             object-fit: cover;
         }
 
         .menu-content {
-            padding: 1.5rem;
+            padding: 1rem;
         }
 
         .menu-category {
@@ -87,15 +88,15 @@ $menu_items = $stmt->get_result();
         }
 
         .menu-name {
-            font-size: 1.25rem;
+            font-size: 1.1rem;
             color: #333;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.3rem;
         }
 
         .menu-description {
             color: #666;
-            margin-bottom: 1rem;
-            font-size: 0.9rem;
+            margin-bottom: 0.8rem;
+            font-size: 0.85rem;
         }
 
         .menu-price {
@@ -127,7 +128,7 @@ $menu_items = $stmt->get_result();
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-top: 1rem;
+            margin-top: 0.8rem;
         }
 
         .rate-btn {
@@ -150,13 +151,16 @@ $menu_items = $stmt->get_result();
         }
 
         .add-to-cart {
-            padding: 0.5rem 1rem;
+            width: 100%;
+            padding: 0.5rem;
             background: #4CAF50;
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 4px;
             cursor: pointer;
             font-size: 0.9rem;
+            text-align: center;
+            text-decoration: none;
             transition: background 0.3s ease;
         }
 
@@ -280,6 +284,111 @@ $menu_items = $stmt->get_result();
                 font-size: 0.9rem;
             }
         }
+
+        .cart-actions {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        
+        .quantity-input {
+            width: 60px;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 5px;
+            color: white;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        .success-notification {
+            background-color: #4CAF50;
+        }
+        
+        .error-notification {
+            background-color: #f44336;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+
+        .rating-summary {
+            display: flex;
+            gap: 2rem;
+            margin: 1rem 0;
+        }
+
+        .average-rating {
+            text-align: center;
+        }
+
+        .big-rating {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .rating-bars {
+            flex: 1;
+        }
+
+        .rating-bar-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 0.5rem 0;
+        }
+
+        .rating-bar {
+            flex: 1;
+            height: 8px;
+            background: #eee;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            background: #ffc107;
+            transition: width 0.3s ease;
+        }
+
+        .recent-ratings {
+            margin-top: 2rem;
+        }
+
+        .rating-item {
+            border-bottom: 1px solid #eee;
+            padding: 1rem 0;
+        }
+
+        .rating-item .user-name {
+            font-weight: 500;
+        }
+
+        .rating-item .rating-date {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .stars-display {
+            color: #ffc107;
+            font-size: 1.2rem;
+        }
     </style>
 </head>
 <body>
@@ -335,9 +444,14 @@ $menu_items = $stmt->get_result();
                 <div class="menu-item">
                     <div class="menu-image-container">
                         <?php 
-                        // Remove 'menu/' from the image path since it's already in the database
-                        $imagePath = str_replace('menu/', '', $item['image']);
-                        if ($item['image'] && file_exists("../../assets/images/" . $imagePath)): 
+                        $imagePath = $item['image'];
+                        $fullPath = "../../assets/images/" . $imagePath;
+                        // Debug output
+                        error_log("Image path from DB: " . $imagePath);
+                        error_log("Full image path: " . $fullPath);
+                        error_log("File exists: " . (file_exists($fullPath) ? 'true' : 'false'));
+                        
+                        if ($imagePath && file_exists($fullPath)): 
                         ?>
                             <img src="../../assets/images/<?php echo htmlspecialchars($imagePath); ?>" 
                                  alt="<?php echo htmlspecialchars($item['name']); ?>" 
@@ -398,9 +512,15 @@ $menu_items = $stmt->get_result();
                                 <a href="rating.php?id=<?php echo $item['id']; ?>" class="rate-btn">
                                     <i class="fas fa-star"></i> Rate
                                 </a>
-                                <button class="add-to-cart" onclick="addToCart(<?php echo $item['id']; ?>, '<?php echo htmlspecialchars($item['name']); ?>', <?php echo $item['price']; ?>)">
-                                    Add to Cart
-                                </button>
+                                <form onsubmit="addToCart(event, this)" class="add-to-cart-form">
+                                    <input type="hidden" name="item_id" value="<?php echo $item['id']; ?>">
+                                    <input type="hidden" name="name" value="<?php echo htmlspecialchars($item['name']); ?>">
+                                    <input type="hidden" name="price" value="<?php echo $item['price']; ?>">
+                                    <input type="hidden" name="quantity" value="1">
+                                    <button type="submit" class="add-to-cart">
+                                        Add to Cart
+                                    </button>
+                                </form>
                             <?php else: ?>
                                 <a href="../profile/login.php" class="rate-btn">
                                     <i class="fas fa-user"></i> Login to Rate
@@ -419,38 +539,121 @@ $menu_items = $stmt->get_result();
     <?php include '../../includes/footer.php'; ?>
 
     <script>
-        function addToCart(itemId, itemName, itemPrice) {
-            const quantity = parseInt(document.getElementById(`quantity-${itemId}`).value);
-            
-            const formData = new FormData();
-            formData.append('item_id', itemId);
-            formData.append('quantity', quantity);
+    function addToCart(event, form) {
+        event.preventDefault();
+        
+        const formData = new FormData(form);
+        formData.append('add_to_cart', '1');
+        
+        fetch('../orders/insert_order.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Show success notification
+                const notification = document.createElement('div');
+                notification.className = 'notification success-notification';
+                notification.innerHTML = `
+                    <i class="fas fa-check-circle"></i>
+                    ${data.message}
+                `;
+                document.body.appendChild(notification);
+                
+                // Update cart count
+                const cartCount = document.querySelector('.cart-count');
+                if (cartCount) {
+                    cartCount.textContent = data.cart_count;
+                    cartCount.style.display = data.cart_count > 0 ? 'flex' : 'none';
+                }
+                
+                // Remove notification after 3 seconds
+                setTimeout(() => {
+                    notification.remove();
+                }, 3000);
+            } else {
+                throw new Error(data.message || 'Error adding item to cart');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            // Show error notification
+            const notification = document.createElement('div');
+            notification.className = 'notification error-notification';
+            notification.innerHTML = `
+                <i class="fas fa-exclamation-circle"></i>
+                ${error.message}
+            `;
+            document.body.appendChild(notification);
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        });
+    }
+    </script>
 
-            fetch('../cart/add_to_cart.php', {
-                method: 'POST',
-                body: formData
-            })
+    <!-- Add this where you want to show the ratings -->
+    <div class="rating-modal" id="ratingModal">
+        <div class="rating-content">
+            <div class="rating-header">
+                <h3>Ratings & Reviews</h3>
+                <div class="rating-summary">
+                    <div class="average-rating">
+                        <span class="big-rating">0.0</span>
+                        <div class="stars-display"></div>
+                        <span class="total-ratings">(0 ratings)</span>
+                    </div>
+                    <div class="rating-bars">
+                        <div class="rating-bar-row">
+                            <span>5 ★</span>
+                            <div class="rating-bar">
+                                <div class="bar-fill" style="width: 0%"></div>
+                            </div>
+                            <span class="bar-percent">0%</span>
+                        </div>
+                        <!-- Repeat for 4,3,2,1 stars -->
+                    </div>
+                </div>
+            </div>
+            <div class="recent-ratings">
+                <h4>Recent Reviews</h4>
+                <div class="ratings-list"></div>
+            </div>
+            <!-- Add rating form here -->
+        </div>
+    </div>
+
+    <script>
+    function updateRatingDisplay(itemId) {
+        fetch(`/Project-I-BCA/public/menu/get_ratings.php?item_id=${itemId}`)
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    showNotification('Item added to cart!', 'success');
+                    // Update average rating
+                    document.querySelector('.big-rating').textContent = data.stats.average_rating;
+                    document.querySelector('.total-ratings').textContent = 
+                        `(${data.stats.total_ratings} ratings)`;
                     
-                    // Update cart count if available
-                    if (data.cartCount) {
-                        updateCartCount(data.cartCount);
-                    }
+                    // Update rating bars
+                    document.querySelector('[data-stars="5"] .bar-fill').style.width = 
+                        `${data.stats.five_star_percent}%`;
+                    // ... repeat for other star ratings
                     
-                    // Reset quantity to 1
-                    document.getElementById(`quantity-${itemId}`).value = 1;
-                } else {
-                    showNotification(data.message || 'Error adding item to cart', 'error');
+                    // Update recent reviews
+                    const ratingsList = document.querySelector('.ratings-list');
+                    ratingsList.innerHTML = data.ratings.map(rating => `
+                        <div class="rating-item">
+                            <div class="user-name">${rating.user_name}</div>
+                            <div class="stars-display">${'★'.repeat(rating.rating)}${'☆'.repeat(5-rating.rating)}</div>
+                            <div class="rating-date">${new Date(rating.created_at).toLocaleDateString()}</div>
+                            <div class="comment">${rating.comment}</div>
+                        </div>
+                    `).join('');
                 }
             })
-            .catch(error => {
-                console.error('Error:', error);
-                showNotification('Error adding item to cart', 'error');
-            });
-        }
+            .catch(error => console.error('Error:', error));
+    }
     </script>
 </body>
 </html>

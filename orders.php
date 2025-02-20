@@ -22,6 +22,7 @@
                 echo '<p><strong>Date:</strong> ' . htmlspecialchars($order['date']) . '</p>';
                 echo '<p><strong>Total:</strong> $' . htmlspecialchars($order['total']) . '</p>';
                 echo '<p><strong>Status:</strong> ' . htmlspecialchars($order['status']) . '</p>';
+                echo '<p><strong>Payment Status:</strong> ' . htmlspecialchars($order['payment_status']) . '</p>';
                 echo '<div class="links">';
                 echo '<a href="order_details.php?id=' . htmlspecialchars($order['id']) . '" class="btn primary-btn">View Details</a>';
                 echo '<a href="cancel_order.php?id=' . htmlspecialchars($order['id']) . '" class="btn secondary-btn">Cancel Order</a>';

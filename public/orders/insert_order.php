@@ -1,61 +1,60 @@
 <?php
 header('Content-Type: application/json');
-include $_SERVER['DOCUMENT_ROOT'] . '/Project-I-BCA/config/database.php';
+require_once '../../config/database.php';
 session_start();
 
-if (!isset($_COOKIE['table_number'])) {
-    echo json_encode(['success' => false, 'message' => 'Table not selected']);
-    exit();
-}
-
 if (!isset($_SESSION['user_id'])) {
-    echo json_encode(['success' => false, 'message' => 'User not logged in']);
+    echo json_encode(['success' => false, 'message' => 'Please login to add items to cart']);
     exit();
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $item_id = intval($_POST['item_id']);
-    $quantity = intval($_POST['quantity']);
+if (!isset($_COOKIE['table_number'])) {
+    echo json_encode(['success' => false, 'message' => 'Please select a table first']);
+    exit();
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_to_cart'])) {
+    $item_id = isset($_POST['item_id']) ? (int)$_POST['item_id'] : 0;
+    $name = isset($_POST['name']) ? $_POST['name'] : '';
+    $price = isset($_POST['price']) ? (float)$_POST['price'] : 0;
+    $quantity = isset($_POST['quantity']) ? (int)$_POST['quantity'] : 1;
     
-    $menu_item_sql = "SELECT * FROM menu_items WHERE id = ?";
-    $stmt = $conn->prepare($menu_item_sql);
-    $stmt->bind_param("i", $item_id);
-    $stmt->execute();
-    $menu_item_result = $stmt->get_result();
-    
-    if ($menu_item_result->num_rows > 0) {
-        $menu_item = $menu_item_result->fetch_assoc();
-        
+    if ($item_id && $name && $price) {
         if (!isset($_SESSION['cart'])) {
             $_SESSION['cart'] = [];
         }
         
         // Check if item already exists in cart
-        $item_exists = false;
+        $found = false;
         foreach ($_SESSION['cart'] as &$cart_item) {
-            if ($cart_item['item_id'] === $item_id) {
+            if ($cart_item['item_id'] == $item_id) { // Changed from === to == for type coercion
                 $cart_item['quantity'] += $quantity;
                 $cart_item['total'] = $cart_item['price'] * $cart_item['quantity'];
-                $item_exists = true;
+                $found = true;
                 break;
             }
         }
         
-        // If item doesn't exist, add it
-        if (!$item_exists) {
+        if (!$found) {
             $_SESSION['cart'][] = [
                 'item_id' => $item_id,
-                'name' => $menu_item['name'],
+                'name' => $name,
+                'price' => $price,
                 'quantity' => $quantity,
-                'price' => $menu_item['price'],
-                'total' => $menu_item['price'] * $quantity
+                'total' => $price * $quantity
             ];
         }
         
         echo json_encode([
             'success' => true,
-            'cart_count' => count($_SESSION['cart']),
-            'message' => 'Item added to cart successfully'
+            'message' => 'Item added to cart successfully!',
+            'cart_count' => count($_SESSION['cart'])
+        ]);
+        exit();
+    } else {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Invalid item data'
         ]);
         exit();
     }
@@ -63,7 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 echo json_encode([
     'success' => false,
-    'message' => 'Failed to add item to cart'
+    'message' => 'Invalid request'
 ]);
 exit();
 ?>

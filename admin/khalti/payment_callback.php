@@ -7,8 +7,12 @@ $callback_data = file_get_contents('php://input');
 $data = json_decode($callback_data, true);
 
 // Log the callback data for debugging
+// $log_file = fopen("khalti_callback.log", "a");
+// fwrite($log_file, date('Y-m-d H:i:s') . " - Callback received: " . $callback_data . "\n");
+// Log entire callback for debugging
 $log_file = fopen("khalti_callback.log", "a");
-fwrite($log_file, date('Y-m-d H:i:s') . " - Callback received: " . $callback_data . "\n");
+fwrite($log_file, date('Y-m-d H:i:s') . " - Callback received: " . print_r($data, true) . "\n");
+fclose($log_file);
 
 try {
     if (isset($data['pidx'])) {
@@ -48,6 +52,7 @@ try {
             $stmt->execute();
             $result = $stmt->get_result();
             $payment_data = $result->fetch_assoc();
+            echo $payment_data;//this is just for testing purpose
 
             if ($payment_data) {
                 // Update order payment status

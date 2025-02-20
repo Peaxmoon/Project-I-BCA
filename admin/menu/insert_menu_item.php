@@ -9,65 +9,54 @@ if (!isset($_SESSION['admin_id'])) {
 
 $message = '';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $name = $_POST['name'];
-    $description = $_POST['description'];
-    $price = $_POST['price'];
-    
-    // Define target directory for images
-    $target_dir = $_SERVER['DOCUMENT_ROOT'] . "/Project-I-BCA/assets/images/menu/";
-    
-    // Create directory if it doesn't exist
-    if (!file_exists($target_dir)) {
-        mkdir($target_dir, 0777, true);
-    }
+// Fetch all categories
+$categories_query = "SELECT id, name FROM menu_categories";
+$categories_result = $conn->query($categories_query);
 
-    // Handle file upload
-    if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-        $file_tmp = $_FILES['image']['tmp_name'];
-        $file_type = strtolower(pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION));
-        
-        // Generate unique filename
-        $unique_filename = 'menu_' . uniqid() . '.' . $file_type;
-        $target_file = $target_dir . $unique_filename;
-        
-        // Check if file is an actual image
-        $check = getimagesize($file_tmp);
-        if ($check !== false) {
-            // Check file size (limit to 5MB)
-            if ($_FILES['image']['size'] <= 5000000) {
-                // Allow certain file formats
-                if (in_array($file_type, ['jpg', 'jpeg', 'png', 'webp'])) {
-                    if (move_uploaded_file($file_tmp, $target_file)) {
-                        // Store relative path in database
-                        $image_path = 'menu/' . $unique_filename;
-                        
-                        // Insert into database
-                        $sql = "INSERT INTO menu_items (name, description, price, image) VALUES (?, ?, ?, ?)";
-                        $stmt = $conn->prepare($sql);
-                        $stmt->bind_param("ssds", $name, $description, $price, $image_path);
-                        
-                        if ($stmt->execute()) {
-                            $message = "Menu item added successfully!";
-                        } else {
-                            $message = "Error: " . $conn->error;
-                            // Delete uploaded file if database insert fails
-                            unlink($target_file);
-                        }
-                    } else {
-                        $message = "Sorry, there was an error uploading your file.";
-                    }
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $name = trim($_POST['name']);
+    $description = trim($_POST['description']);
+    $price = floatval($_POST['price']);
+    $category_id = isset($_POST['category_id']) ? intval($_POST['category_id']) : 0;
+    
+    // Validate inputs
+    if (empty($name) || empty($description) || $price <= 0 || $category_id <= 0) {
+        $message = "All fields are required and price must be greater than 0";
+    } else {
+        // Handle file upload
+        if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+            $file_tmp = $_FILES['image']['tmp_name'];
+            $file_type = strtolower(pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION));
+            
+            // Generate unique filename
+            $unique_filename = 'menu_' . uniqid() . '.' . $file_type;
+            $target_dir = $_SERVER['DOCUMENT_ROOT'] . "/Project-I-BCA/assets/images/menu/";
+            
+            if (!file_exists($target_dir)) {
+                mkdir($target_dir, 0777, true);
+            }
+
+            if (move_uploaded_file($file_tmp, $target_dir . $unique_filename)) {
+                $image_path = 'menu/' . $unique_filename;
+                
+                // Insert into database with category_id
+                $sql = "INSERT INTO menu_items (name, description, price, image, category_id) VALUES (?, ?, ?, ?, ?)";
+                $stmt = $conn->prepare($sql);
+                $stmt->bind_param("ssdsi", $name, $description, $price, $image_path, $category_id);
+                
+                if ($stmt->execute()) {
+                    $message = "Menu item added successfully!";
+                    // Clear form
+                    $_POST = array();
                 } else {
-                    $message = "Sorry, only JPG, JPEG, PNG & WEBP files are allowed.";
+                    $message = "Error adding menu item: " . $conn->error;
                 }
             } else {
-                $message = "Sorry, your file is too large. Maximum size is 5MB.";
+                $message = "Error uploading image file.";
             }
         } else {
-            $message = "File is not an image.";
+            $message = "Please select an image file.";
         }
-    } else {
-        $message = "Please select an image to upload.";
     }
 }
 ?>
@@ -97,20 +86,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             margin-bottom: 5px;
             font-weight: bold;
         }
-        input, textarea {
+        input, select, textarea {
             width: 100%;
             padding: 10px;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             border-radius: 5px;
             border: 1px solid #ddd;
+            box-sizing: border-box;
         }
         button {
             background-color: #4CAF50;
             color: white;
-            padding: 10px 20px;
+            padding: 12px 20px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            width: 100%;
+            font-size: 16px;
         }
         button:hover {
             background-color: #45a049;
@@ -118,31 +110,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .message {
             text-align: center;
             margin-bottom: 20px;
-            font-size: 1.2em;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
         }
     </style>
 </head>
 <body>
+
+        
     <h1>Insert Menu Item</h1>
 
     <?php if ($message): ?>
-        <p class="message"><?php echo $message; ?></p>
+        <p class="message"><?php echo htmlspecialchars($message); ?></p>
     <?php endif; ?>
 
     <form action="insert_menu_item.php" method="POST" enctype="multipart/form-data">
-        <label for="dish-name">Enter Dish Name:</label>
-        <input type="text" id="dish-name" name="name" required><br>
+        <label for="category">Select Category:</label>
+        <select id="category" name="category_id" required>
+            <option value="">Select a category</option>
+            <?php while($category = $categories_result->fetch_assoc()): ?>
+                <option value="<?php echo $category['id']; ?>">
+                    <?php echo htmlspecialchars($category['name']); ?>
+                </option>
+            <?php endwhile; ?>
+        </select>
 
-        <label for="menu-description">Short Description:</label>
-        <input type="text" id="menu-description" name="description" required><br>
+        <label for="dish-name">Enter Dish Name:</label>
+        <input type="text" id="dish-name" name="name" required>
+
+        <label for="menu-description">Description:</label>
+        <textarea id="menu-description" name="description" required rows="4"></textarea>
 
         <label for="menu-price">Price:</label>
-        <input type="number" id="menu-price" name="price" step="0.01" required><br>
+        <input type="number" id="menu-price" name="price" step="0.01" min="0" required>
 
         <label for="image">Upload Image:</label>
-        <input type="file" id="image" name="image" accept="image/*" required><br>
+        <input type="file" id="image" name="image" accept="image/jpeg,image/png,image/gif" required>
 
-        <button type="submit">Add New Item</button>
+        <button type="submit">Add Menu Item</button>
     </form>
 </body>
 </html>

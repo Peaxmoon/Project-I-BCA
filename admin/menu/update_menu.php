@@ -1,71 +1,76 @@
 <?php
 session_start();
-// Include database connection
-include $_SERVER['DOCUMENT_ROOT'] . '/Project-I-BCA/config/database.php';
+require '../../config/database.php';
 
 if (!isset($_SESSION['admin_id'])) {
-    // If no `admin_id` is found in the session, redirect to the login page
-    header("Location: /Project-I-BCA/admin/admin_login.php"); 
-    exit();  // Ensure no further code is executed
+    header("Location: ../admin_login.php");
+    exit();
 }
-// Check if an `item_id` is provided
-if (isset($_GET['item_id'])) {
-    $item_id = intval($_GET['item_id']); // Ensure `item_id` is an integer
 
-    // Fetch the menu item details
-    $sql = "SELECT * FROM menu_items WHERE id = $item_id";
-    $result = $conn->query($sql);
+$message = '';
 
-    if ($result->num_rows > 0) {
-        $item = $result->fetch_assoc();
-        $message = '';
+// Fetch all categories
+$categories_query = "SELECT id, name FROM menu_categories";
+$categories_result = $conn->query($categories_query);
 
-        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            // Get updated data from the form
-            $item_name = $_POST['item_name'];
-            $description = $_POST['description'];
-            $price = $_POST['price'];
+if (isset($_GET['id'])) {
+    $item_id = intval($_GET['id']);
+    $item_query = "SELECT * FROM menu_items WHERE id = $item_id";
+    $item_result = $conn->query($item_query);
 
-            // Handle image upload if provided
-            $image = $item['image']; // Keep the current image if no new one is uploaded
-            if (!empty($_FILES['image']['name'])) {
-                $allowed_types = ['image/jpeg', 'image/png', 'image/gif']; // Allowed MIME types
-                $file_type = mime_content_type($_FILES['image']['tmp_name']);
-                $file_extension = strtolower(pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION));
+    if ($item_result->num_rows > 0) {
+        $item = $item_result->fetch_assoc();
 
-                if (in_array($file_type, $allowed_types) && in_array($file_extension, ['jpg', 'jpeg', 'png', 'gif'])) {
-                    $target_dir = $_SERVER['DOCUMENT_ROOT'] . "/uploads/";
-                    $target_file = $target_dir . basename($_FILES['image']['name']);
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $item_name = trim($_POST['name']);
+            $description = trim($_POST['description']);
+            $price = floatval($_POST['price']);
+            $category_id = isset($_POST['category_id']) ? intval($_POST['category_id']) : 0;
 
-                    // Move the uploaded file to the server directory
-                    if (move_uploaded_file($_FILES['image']['tmp_name'], $target_file)) {
-                        // Remove the old image if a new one is uploaded
-                        if (!empty($image) && file_exists($target_dir . $image)) {
-                            unlink($target_dir . $image);
-                        }
-                        $image = basename($_FILES['image']['name']); // Save the new image name
+            // Validate inputs
+            if (empty($item_name) || empty($description) || $price <= 0 || $category_id <= 0) {
+                $message = "All fields are required and price must be greater than 0";
+            } else {
+                // Handle file upload
+                if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+                    $file_tmp = $_FILES['image']['tmp_name'];
+                    $file_type = strtolower(pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION));
+                    
+                    // Generate unique filename
+                    $unique_filename = 'menu_' . uniqid() . '.' . $file_type;
+                    $target_dir = $_SERVER['DOCUMENT_ROOT'] . "/Project-I-BCA/assets/images/menu/";
+                    
+                    if (!file_exists($target_dir)) {
+                        mkdir($target_dir, 0777, true);
+                    }
+
+                    if (move_uploaded_file($file_tmp, $target_dir . $unique_filename)) {
+                        $image_path = 'menu/' . $unique_filename;
                     } else {
-                        $message = "Failed to upload the image.";
+                        $message = "Error uploading image file.";
                     }
                 } else {
-                    $message = "Invalid image type. Only JPEG, PNG, and GIF are allowed.";
+                    $image_path = $item['image'];
                 }
-            }
 
-            // Update the menu item in the database if no errors
-            if (empty($message)) {
-                $update_sql = "UPDATE menu_items 
-                               SET name = '$item_name', 
-                                   description = '$description', 
-                                   price = $price, 
-                                   image = '$image' 
-                               WHERE id = $item_id";
+                // Update the menu item in the database if no errors
+                if (empty($message)) {
+                    $update_sql = "UPDATE menu_items 
+                                   SET name = ?, 
+                                       description = ?, 
+                                       price = ?, 
+                                       image = ?, 
+                                       category_id = ? 
+                                   WHERE id = ?";
+                    $stmt = $conn->prepare($update_sql);
+                    $stmt->bind_param("ssdssi", $item_name, $description, $price, $image_path, $category_id, $item_id);
 
-                if ($conn->query($update_sql) === TRUE) {
-                    header("Location: menu_list.php?message=" . urlencode("Menu item updated successfully!"));
-                    exit;
-                } else {
-                    $message = "Error updating item: " . $conn->error;
+                    if ($stmt->execute()) {
+                        header("Location: menu_list.php?message=" . urlencode("Menu item updated successfully!"));
+                        exit;
+                    } else {
+                        $message = "Error updating item: " . $conn->error;
+                    }
                 }
             }
         }
@@ -82,65 +87,92 @@ $conn->close();
 
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Update Menu Item</title>
     <style>
-        .menu-image-preview {
-            max-width: 200px;
-            max-height: 200px;
-            object-fit: cover;
-            border: 1px solid #ccc;
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            padding: 20px;
+        }
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 60%;
+            margin: 0 auto;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
             border-radius: 5px;
-            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .message {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
         }
     </style>
 </head>
-
 <body>
-    <nav>
-        <ul>
-            <li><a href="/Project-I-BCA/admin/admindashboard.php">Dashboard</a></li>
-            <li><a href="/Project-I-BCA/admin/menu/menu_list.php">Menu</a></li>
-        </ul>
-    </nav>
+    <h1>Update Menu Item</h1>
 
-    <div class="container">
-        <h2>Update Menu Item</h2>
-        <?php if (empty($item)) {
-            echo "Item data not found or invalid item ID.";
-        } ?>
+    <?php if ($message): ?>
+        <p class="message"><?php echo htmlspecialchars($message); ?></p>
+    <?php endif; ?>
 
-        <?php if (!empty($message)) : ?>
-            <p class="message"><?php echo htmlspecialchars($message); ?></p>
-        <?php endif; ?>
+    <form action="update_menu.php?id=<?php echo $item_id; ?>" method="POST" enctype="multipart/form-data">
+        <label for="category">Select Category:</label>
+        <select id="category" name="category_id" required>
+            <option value="">Select a category</option>
+            <?php while($category = $categories_result->fetch_assoc()): ?>
+                <option value="<?php echo $category['id']; ?>" <?php echo $category['id'] == $item['category_id'] ? 'selected' : ''; ?>>
+                    <?php echo htmlspecialchars($category['name']); ?>
+                </option>
+            <?php endwhile; ?>
+        </select>
 
-        <?php if (!empty($item)) : ?>
-            <form action="update_menu.php?item_id=<?php echo $item_id; ?>" method="POST" enctype="multipart/form-data">
-                <label for="item_name">Item Name:</label><br>
-                <input type="text" id="item_name" name="item_name" value="<?php echo htmlspecialchars($item['name']); ?>" required><br><br>
+        <label for="dish-name">Enter Dish Name:</label>
+        <input type="text" id="dish-name" name="name" value="<?php echo htmlspecialchars($item['name']); ?>" required>
 
-                <label for="description">Description:</label><br>
-                <textarea id="description" name="description" required><?php echo htmlspecialchars($item['description']); ?></textarea><br><br>
+        <label for="menu-description">Description:</label>
+        <textarea id="menu-description" name="description" required rows="4"><?php echo htmlspecialchars($item['description']); ?></textarea>
 
-                <label for="price">Price:</label><br>
-                <input type="number" id="price" name="price" value="<?php echo htmlspecialchars($item['price']); ?>" step="0.01" required><br><br>
+        <label for="menu-price">Price:</label>
+        <input type="number" id="menu-price" name="price" step="0.01" min="0" value="<?php echo htmlspecialchars($item['price']); ?>" required>
 
-                <label for="image">Image (optional, JPEG/PNG/GIF only):</label><br>
-                <input type="file" id="image" name="image" accept="image/jpeg, image/png, image/gif"><br>
-                <?php if (!empty($item['image']) && file_exists($_SERVER['DOCUMENT_ROOT'] . "/uploads/" . $item['image'])) : ?>
-                    <img src="/uploads/<?php echo htmlspecialchars($item['image']); ?>" alt="Menu Image" class="menu-image-preview"><br>
-                <?php else : ?>
-                    <p>No image available.</p>
-                <?php endif; ?>
+        <label for="image">Upload Image:</label>
+        <input type="file" id="image" name="image" accept="image/jpeg,image/png,image/gif">
+        <p>Current Image: <img src="/Project-I-BCA/assets/images/<?php echo htmlspecialchars($item['image']); ?>" alt="Menu Image" class="menu-image-preview"></p>
 
-
-                <button type="submit">Update Item</button>
-            </form>
-        <?php endif; ?>
-    </div>
+        <button type="submit">Update Menu Item</button>
+    </form>
 </body>
-
 </html>
