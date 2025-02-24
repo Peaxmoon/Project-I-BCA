@@ -83,11 +83,11 @@ ADD COLUMN `payment_status` ENUM('not_paid', 'paid') DEFAULT 'not_paid';
 
 -- for order admins
 CREATE TABLE `admins` (
-    `id` INT(11) AUTO_INCREMENT PRIMARY KEY,  -- Unique ID for each admin
-    `email` VARCHAR(255) NOT NULL UNIQUE,     -- Email field (unique to each admin)
-    `password` VARCHAR(255) NOT NULL,         -- Password field (hashed)
-    `name` VARCHAR(100) NOT NULL,             -- Name field (admin's name)
-    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- Timestamp when the admin is created
+    id INT(11) AUTO_INCREMENT PRIMARY KEY,  -- Unique ID for each admin
+    email VARCHAR(255) NOT NULL UNIQUE,     -- Email field (unique to each admin)
+    password VARCHAR(255) NOT NULL,         -- Password field (hashed)
+    name VARCHAR(100) NOT NULL,             -- Name field (admin's name)
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- Timestamp when the admin is created
 );
 -- Create revenue_logs table
 CREATE TABLE revenue_logs (
@@ -111,21 +111,3 @@ CREATE TABLE food_ratings (
 );
 
 
--- Foreign key constaraints
-ALTER TABLE orders
-ADD CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users(id),
-ADD CONSTRAINT fk_table_id FOREIGN KEY (table_id) REFERENCES tables(id);
-
-ALTER TABLE order_items
-ADD CONSTRAINT fk_order_id FOREIGN KEY (order_id) REFERENCES orders(id),
-ADD CONSTRAINT fk_menu_item_id FOREIGN KEY (menu_item_id) REFERENCES menu_items(id);
-
--- Rules on delete or update
-ALTER TABLE orders
-ADD CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE;
-
--- create index to foreign key for faster queries
-CREATE INDEX idx_user_id ON orders(user_id);
-CREATE INDEX idx_table_id ON orders(table_id);
-CREATE INDEX idx_order_id ON order_items(order_id);
-CREATE INDEX idx_menu_item_id ON order_items(menu_item_id);
